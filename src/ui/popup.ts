@@ -5,6 +5,7 @@ import { dayTypeIndexFor, inMinutes, loadSchedule, nowMinutes, upcoming } from '
 import { t } from '../i18n.ts';
 import { setState } from '../state.ts';
 import { badge, esc } from './dom.ts';
+import { planEnd } from './planner.ts';
 
 let popup: Popup | null = null;
 let token = 0;
@@ -33,6 +34,7 @@ export function openStopPopup(map: MlMap, data: AppData, stopId: string) {
     <h3>${s.name ? esc(s.name) : t('unnamedStop')}</h3>
     <p>${s.name ? (lines.length === 1 ? t('lineStopsHere') : t('linesStopHere', { n: lines.length })) : t('nameMissing')}</p>
     <div class="badges">${lines.map((l) => `<button data-line="${l.id}" aria-label="${esc(t('lineN', { ref: l.ref }))}">${badge(data, l, 'sm')}</button>`).join('')}</div>
+    <div class="plan-btns"><button data-plan="from" data-place="${esc(s.groupId)}">${t('planFromHere')}</button><button data-plan="to" data-place="${esc(s.groupId)}">${t('planToHere')}</button></div>
     ${stops.length ? `<div class="deps"><p class="tt-msg">${t('loadingDepartures')}</p></div>` : ''}`);
 
   if (!stops.length) return;
@@ -80,6 +82,13 @@ function showPopup(map: MlMap, at: [number, number], html: string) {
 }
 
 function wire() {
+  popup?.getElement().querySelectorAll<HTMLButtonElement>('[data-plan]:not([data-wired])').forEach((b) => {
+    b.dataset.wired = '1';
+    b.addEventListener('click', () => {
+      popup?.remove();
+      planEnd(b.dataset.plan as 'from' | 'to', b.dataset.place!);
+    });
+  });
   popup?.getElement().querySelectorAll<HTMLButtonElement>('[data-line]:not([data-wired])').forEach((b) => {
     b.dataset.wired = '1';
     b.addEventListener('click', () => {

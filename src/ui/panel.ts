@@ -46,6 +46,8 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
     if (e.key === 'Enter') list.querySelector<HTMLButtonElement>('.row')?.click();
   });
 
+  $('#plan-open').addEventListener('click', () => setState({ plan: true }));
+
   list.addEventListener('click', (e) => {
     const row = (e.target as HTMLElement).closest<HTMLButtonElement>('.row');
     if (row) setState({ lineId: row.dataset.line!, variantId: null });
@@ -255,11 +257,17 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
   const shift = (dir: 1 | -1, px: number) => (isMobile() ? `translateY(${dir * 8}px)` : `translateX(${dir * px}px)`);
   const panelEl = $('#panel');
 
-  async function showDetail(line: Line, variantId: string | null, fromList: boolean) {
-    if (fromList && !reducedMotion()) {
-      await animate(listView, { opacity: [1, 0], transform: ['none', shift(-1, 16)] }, { duration: DUR.fast, ease: EASE_IN }).finished;
-    }
-    listView.hidden = true;
+  const planView = $('#view-plan');
+  /** vederea care iese (oricare e vizibilă acum, în afară de cea care intră) */
+  async function leave(except: HTMLElement, dir: 1 | -1) {
+    const out = [listView, detailView, planView].find((v) => v !== except && !v.hidden);
+    if (!out) return;
+    if (!reducedMotion()) await animate(out, { opacity: [1, 0], transform: ['none', shift(dir, dir < 0 ? 16 : 20)] }, { duration: DUR.fast, ease: EASE_IN }).finished;
+    out.hidden = true;
+  }
+
+  async function showDetail(line: Line, variantId: string | null) {
+    await leave(detailView, -1);
     detailView.hidden = false;
     panelEl.classList.add('is-detail');
     renderDetail(line, variantId);
@@ -270,9 +278,15 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
     if (!isMobile()) ($('.back', detailView) as HTMLButtonElement).focus({ preventScroll: true });
   }
 
+  async function showPlan() {
+    await leave(planView, -1);
+    planView.hidden = false;
+    panelEl.classList.add('is-detail');
+    if (!reducedMotion()) animate(planView, { opacity: [0, 1], transform: [shift(1, 20), 'none'] }, { duration: DUR.base, ease: EASE_OUT });
+  }
+
   async function showList() {
-    if (!reducedMotion()) await animate(detailView, { opacity: [1, 0], transform: ['none', shift(1, 20)] }, { duration: DUR.fast, ease: EASE_IN }).finished;
-    detailView.hidden = true;
+    await leave(listView, 1);
     listView.hidden = false;
     panelEl.classList.remove('is-detail');
     listView.style.opacity = '1';
@@ -287,11 +301,12 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
     if (s.mode !== prev.mode) chips.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-checked', String((c as HTMLElement).dataset.mode === s.mode)));
     if (s.query !== prev.query || s.mode !== prev.mode) renderList(true);
 
-    if (s.lineId !== prev.lineId) {
+    if (s.lineId !== prev.lineId || s.plan !== prev.plan) {
       if (s.lineId) {
         lastLine = s.lineId;
-        showDetail(data.lineById.get(s.lineId)!, s.variantId, !prev.lineId);
-      } else showList();
+        showDetail(data.lineById.get(s.lineId)!, s.variantId);
+      } else if (s.plan) showPlan();
+      else showList();
     } else if (s.lineId && s.variantId !== prev.variantId) {
       // schimbare de sens: re-randare + glisarea indicatorului + intrarea stațiilor
       const seg = detailView.querySelector('.seg');

@@ -22,7 +22,7 @@
     "snapshot": "tsx scripts/snapshot.ts",
     "data:fetch-transurb": "tsx scripts/fetch-transurb.ts",
     "data:verify": "tsx scripts/verify-data.ts",
-    "test": "tsx --test scripts/lib/match.test.ts",
+    "test": "tsx --test scripts/lib/match.test.ts src/plan.test.ts",
     "data:fetch-roads": "tsx scripts/fetch-roads.ts",
     "trailer:assets": "tsx scripts/trailer/capture-assets.ts",
     "trailer:render": "tsx scripts/trailer/render.ts"

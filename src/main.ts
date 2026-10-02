@@ -3,12 +3,15 @@ import './map/worker.ts';
 import { loadData } from './data.ts';
 import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from './i18n.ts';
 import { addLayers, LAYER, setDimmed } from './map/layers.ts';
+import { drawPlan } from './map/plan.ts';
 import { type Padding, showSelection } from './map/selection.ts';
+import { buildNetwork } from './plan.ts';
 import { loadBaseStyle } from './map/style.ts';
 import { DUR, easeInOutCubic, ms } from './motion/tokens.ts';
 import { getState, lineFromHash, setState, subscribe } from './state.ts';
 import { $ } from './ui/dom.ts';
 import { initPanel } from './ui/panel.ts';
+import { initPlanner } from './ui/planner.ts';
 import { closePopup, openLinesPopup, openStopPopup } from './ui/popup.ts';
 import { initSheet } from './ui/sheet.ts';
 
@@ -84,15 +87,34 @@ async function main() {
 
   // ——— selecție ———
   subscribe((s, prev) => {
+    if (s.plan !== prev.plan) {
+      closePopup();
+      if (s.plan && sheet.isMobile()) sheet.snapTo('full');
+    }
     if (s.lineId === prev.lineId && s.variantId === prev.variantId) return;
     closePopup();
     if (s.lineId && sheet.isMobile() && sheet.snap === 'peek') sheet.snapTo('half');
-    if (!s.lineId && sheet.isMobile()) sheet.snapTo('peek');
+    if (!s.lineId && !s.plan && sheet.isMobile()) sheet.snapTo('peek');
     showSelection(map, data, s.lineId, s.variantId, padding(), s.lineId !== prev.lineId);
   });
 
+  // ——— planificator (abonat după selecție: desenul lui vine peste curățarea hărții) ———
+  const net = buildNetwork(data.lines, data.stops.features);
+  const planner = initPlanner(data, net, {
+    onItinerary(it) {
+      drawPlan(map, data, net, it, padding());
+      if (!it && !getState().lineId) setDimmed(map, false);
+    },
+    onResults() {
+      if (sheet.isMobile()) sheet.snapTo('half');
+    },
+  });
+
   const initial = lineFromHash();
-  if (initial && data.lineById.has(initial)) {
+  if (planner.openFromHash) {
+    map.jumpTo({ pitch: 45, bearing: -17 });
+    setState({ plan: true });
+  } else if (initial && data.lineById.has(initial)) {
     map.jumpTo({ pitch: 52, bearing: -17 });
     setState({ lineId: initial });
   } else {
@@ -116,7 +138,9 @@ async function main() {
     map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
   }
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && getState().lineId) setState({ lineId: null, variantId: null });
+    if (e.key !== 'Escape') return;
+    if (getState().lineId) setState({ lineId: null, variantId: null });
+    else if (getState().plan) setState({ plan: false });
   });
 }
 

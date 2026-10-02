@@ -76,6 +76,14 @@ button { font: inherit; color: inherit; }
 .search svg { width: 18px; height: 18px; fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; flex: none; }
 .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: var(--ink); }
 
+.search-row { flex: none; display: flex; gap: 8px; margin: 0 14px; }
+.search-row .search { flex: 1; min-width: 0; margin: 0; }
+.plan-open { flex: none; height: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 12px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: transform 0.12s, opacity 0.16s; }
+.plan-open:hover { opacity: 0.9; }
+.plan-open:active { transform: scale(0.96); }
+.plan-open svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.plan-open svg circle { fill: currentColor; stroke: none; }
+
 .chips { flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px 10px; }
 .chip { flex: none; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.12s; }
 .chip:active { transform: scale(0.96); }
@@ -199,6 +207,73 @@ button { font: inherit; color: inherit; }
 .stop-popup .badges button:hover { transform: translateY(-1px); }
 .stop-popup .badges button:active { transform: scale(0.94); }
 @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(0.94); } }
+
+.stop-popup .plan-btns { display: flex; gap: 6px; margin-top: 10px; }
+.stop-popup .plan-btns button { flex: 1; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background 0.16s; }
+.stop-popup .plan-btns button:hover { background: #eceae5; }
+
+/* ——— planificator ——— */
+.view-plan { overflow-y: auto; overscroll-behavior: contain; }
+.plan-form { position: relative; flex: none; margin: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+/* linia punctată dintre plecare și sosire */
+.plan-form::before { content: ''; position: absolute; left: 18px; top: 31px; bottom: 31px; width: 2px; background: repeating-linear-gradient(var(--ink-3) 0 3px, transparent 3px 6px); }
+.plan-field { display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 52px 0 14px; }
+.plan-field + .plan-field { border-top: 1px solid var(--line); }
+.plan-field:focus-within { background: color-mix(in srgb, var(--focus) 5%, transparent); }
+.plan-field:first-child { border-radius: 13px 13px 0 0; }
+.plan-field:nth-child(2) { border-radius: 0 0 13px 13px; }
+.plan-field input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: var(--ink); text-overflow: ellipsis; }
+.plan-field input::placeholder { color: var(--ink-3); }
+.plan-dot { position: relative; flex: none; width: 10px; height: 10px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); }
+.plan-dot.to { background: var(--ink); border-radius: 3px; }
+.plan-clear { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: none; color: var(--ink-3); cursor: pointer; }
+.plan-clear[hidden] { display: none; }
+.plan-clear:hover { background: rgba(0, 0, 0, 0.05); }
+.plan-clear svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.plan-swap { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; transition: background 0.16s; }
+.plan-swap:hover { background: #eceae5; }
+.plan-swap svg { width: 18px; height: 18px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.plan-suggest { position: absolute; left: 0; right: 0; z-index: 5; margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); max-height: min(320px, 50vh); overflow-y: auto; overscroll-behavior: contain; }
+.plan-suggest[hidden] { display: none; }
+.plan-suggest button { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; }
+.plan-suggest button:hover, .plan-suggest button:focus-visible { background: var(--surface-2); outline-offset: -2px; }
+.plan-sname { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
+.plan-slines { display: flex; align-items: center; gap: 3px; }
+.plan-slines .badge.sm { width: 22px; height: 22px; font-size: 10px; border-radius: 5px; }
+.plan-slines .badge.sm[data-mode='tram'] { border-radius: 50%; }
+.plan-slines small { font-size: 11px; color: var(--ink-3); }
+.plan-empty { padding: 10px; font-size: 13px; color: var(--ink-2); }
+
+.plan-results { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 20px; }
+.plan-msg { margin: 6px 4px; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.plan-opt { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.plan-opt[data-open] { border-color: rgba(20, 20, 30, 0.22); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); }
+.plan-sum { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px; border: 0; border-radius: 13px; background: none; text-align: left; cursor: pointer; }
+.plan-opt:not([data-open]) .plan-sum:hover { background: var(--surface-2); }
+.plan-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.plan-sep { color: var(--ink-3); font-size: 15px; padding: 0 1px; }
+.plan-walk, .leg-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--surface-2); border: 1px solid var(--line); }
+.plan-walk svg, .leg-icon svg { width: 18px; height: 18px; fill: none; stroke: var(--ink-2); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.plan-walk svg circle, .leg-icon svg circle { fill: var(--ink-2); stroke: none; }
+.plan-meta { font-size: 12.5px; color: var(--ink-2); }
+.plan-meta b { color: var(--ink); }
+.plan-legs { list-style: none; margin: 0; padding: 0 12px 12px; border-top: 1px solid var(--line); }
+.leg { position: relative; padding: 10px 0 4px 40px; font-size: 13.5px; line-height: 1.35; }
+.leg p { margin: 3px 0; }
+.leg.walk { display: flex; align-items: center; min-height: 46px; }
+.leg.walk .leg-icon { position: absolute; left: 0; top: 8px; }
+/* firul colorat al cursei, între urcare și coborâre */
+.leg.ride::before { content: ''; position: absolute; left: 13px; top: 50px; bottom: 14px; width: 4px; border-radius: 2px; background: var(--c); }
+.leg-line { display: flex; align-items: center; gap: 10px; margin: 0 0 4px -40px; padding: 2px 6px 2px 0; border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; }
+.leg-line:hover { background: var(--surface-2); }
+.leg-line b { font-size: 14px; }
+.leg-line span span { color: var(--ink-2); font-size: 12.5px; }
+.leg-label { margin-top: 0; }
+.leg-count { color: var(--ink-3); font-size: 12px; }
+.leg-next { font-size: 12px; color: var(--ink-2); }
+.leg-next[hidden] { display: none; }
+.leg-next b { font-variant-numeric: tabular-nums; color: var(--ink); }
+.plan-note { margin: 4px 2px 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); }
 
 /* ——— încărcare ——— */
 .loading { position: fixed; inset: 0; z-index: 50; display: grid; place-content: center; justify-items: center; gap: 14px; background: var(--bg); color: var(--ink-2); font-size: 14px; transition: opacity 0.5s ease; }

@@ -86,8 +86,10 @@ export function initSheet(onChange: (visiblePx: number) => void) {
   panel.addEventListener('pointerup', end);
   panel.addEventListener('pointercancel', end);
 
-  // focusul în căutare deschide sheet-ul complet (tastatura ocupă jumătate de ecran)
-  $('#search').addEventListener('focus', () => snap !== 'full' && snapTo('full'));
+  // focusul într-un câmp de text deschide sheet-ul complet (tastatura ocupă jumătate de ecran)
+  panel.addEventListener('focusin', (e) => {
+    if ((e.target as HTMLElement).matches('input') && snap !== 'full') snapTo('full');
+  });
 
   const reset = () => {
     if (mq.matches) apply(yFor(snap));

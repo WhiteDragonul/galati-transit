@@ -19,6 +19,11 @@ export const LAYER = {
   stopLabels: 'stops-label',
   selStops: 'sel-stops',
   selStopLabels: 'sel-stops-label',
+  planCasing: 'plan-casing',
+  planLine: 'plan-line',
+  planWalk: 'plan-walk',
+  planStops: 'plan-stops',
+  planLabels: 'plan-labels',
 } as const;
 
 export const EMPTY = { type: 'FeatureCollection', features: [] } as const;
@@ -109,6 +114,43 @@ export function addLayers(map: MlMap, data: AppData) {
       'text-allow-overlap': false, 'icon-allow-overlap': false,
     },
     paint: { 'text-color': '#1d1d1f', 'text-opacity': 1, 'icon-opacity': 1 },
+  });
+
+  // ——— călătoria din planificator ———
+  map.addSource('plan', { type: 'geojson', data: EMPTY as never });
+  map.addSource('plan-stops', { type: 'geojson', data: EMPTY as never });
+  map.addLayer({
+    id: LAYER.planCasing, type: 'line', source: 'plan', filter: ['!', ['get', 'walk']],
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#ffffff', 'line-width': z(10, 5, 13, 9, 16, 16), 'line-opacity': 0.95 },
+  }, LABELS_BEFORE);
+  map.addLayer({
+    id: LAYER.planLine, type: 'line', source: 'plan', filter: ['!', ['get', 'walk']],
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': ['get', 'colour'], 'line-width': z(10, 3, 13, 5.5, 16, 10) },
+  }, LABELS_BEFORE);
+  map.addLayer({
+    id: LAYER.planWalk, type: 'line', source: 'plan', filter: ['get', 'walk'],
+    layout: { 'line-cap': 'round' },
+    paint: { 'line-color': ['get', 'colour'], 'line-width': z(10, 2, 16, 4), 'line-dasharray': [0.1, 2] },
+  }, LABELS_BEFORE);
+  map.addLayer({
+    id: LAYER.planStops, type: 'circle', source: 'plan-stops',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, ['case', ['==', ['get', 'role'], 'end'], 5, 4], 16, ['case', ['==', ['get', 'role'], 'end'], 10, 8]],
+      'circle-color': ['case', ['==', ['get', 'role'], 'end'], ['get', 'colour'], '#ffffff'],
+      'circle-stroke-color': ['case', ['==', ['get', 'role'], 'end'], '#ffffff', ['get', 'colour']],
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 16, 3.5],
+    },
+  });
+  map.addLayer({
+    id: LAYER.planLabels, type: 'symbol', source: 'plan-stops',
+    layout: {
+      'text-field': ['get', 'name'], 'text-font': ['literal', FONT_BOLD], 'text-size': 12,
+      'icon-image': 'chip', 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 7, 3, 7],
+      'text-anchor': 'bottom', 'text-offset': [0, -1.2],
+    },
+    paint: { 'text-color': '#1d1d1f' },
   });
 }
 
