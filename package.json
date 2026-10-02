@@ -1,0 +1,25 @@
+{
+  "name": "galati-transit",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "data:fetch": "tsx scripts/fetch-osm.ts",
+    "data:build": "tsx scripts/build-data.ts",
+    "data": "npm run data:fetch && npm run data:build",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.11.2"
+  }
+}
