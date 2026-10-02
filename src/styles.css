@@ -71,12 +71,12 @@ button { font: inherit; color: inherit; }
 .view { position: absolute; inset: 0; display: flex; flex-direction: column; }
 .view[hidden] { display: none; }
 
-.search { display: flex; align-items: center; gap: 8px; margin: 0 14px; padding: 0 12px; height: 44px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); transition: border-color 0.16s, box-shadow 0.16s; }
+.search { flex: none; display: flex; align-items: center; gap: 8px; margin: 0 14px; padding: 0 12px; height: 44px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); transition: border-color 0.16s, box-shadow 0.16s; }
 .search:focus-within { border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 18%, transparent); }
 .search svg { width: 18px; height: 18px; fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; flex: none; }
 .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: var(--ink); }
 
-.chips { display: flex; gap: 6px; padding: 12px 14px 10px; overflow-x: auto; scrollbar-width: none; }
+.chips { flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px 10px; }
 .chip { flex: none; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.12s; }
 .chip:active { transform: scale(0.96); }
 .chip[aria-checked='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }

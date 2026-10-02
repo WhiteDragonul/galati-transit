@@ -44,6 +44,12 @@ async function main() {
   });
   if (import.meta.env.DEV) Object.assign(window, { __map: map });
   map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
+  // busola MapLibre doar resetează la 2D (nord, fără înclinare); când harta e deja plată, o folosim ca să revenim la 3D
+  map.getContainer().querySelector('.maplibregl-ctrl-compass')?.addEventListener('click', (e) => {
+    if (map.getPitch() > 1 || Math.abs(map.getBearing()) > 1) return;
+    e.stopImmediatePropagation();
+    map.easeTo({ pitch: 52, bearing: -17, duration: ms(900), easing: easeInOutCubic });
+  }, { capture: true });
   // atribuirea obligatorie (ODbL pentru date, CC-BY pentru schema OpenMapTiles) e un element propriu de un rând
   // (index.html, #attribution): controlul MapLibre ar repeta atribuirea lungă din TileJSON
 
