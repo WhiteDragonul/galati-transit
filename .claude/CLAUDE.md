@@ -7,6 +7,7 @@ Hartă 3D a transportului public din Galați (Transurb). Prototip static: fără
   - `data:fetch` → OSM prin Overpass (geometrie trasee + poziții stații).
   - `data:fetch-transurb` → transurbgalati.ro: lista oficială de linii, stații tur/retur, orare pe stație.
   - `data:build` → `public/data/*` + `data/report.md`; `data:verify` → verificări + comparare cu site-ul live.
+- Potriviri de stații confirmate de utilizator (acronime diferite): `stopAliases` în `data/overrides.json` (ex. F.S.E.A./FSEA/F.E.A.A. → F.E.E.A.).
 - Regulă: nu se inventează date. Ce lipsește se marchează (report + UI „date incomplete”). Corecții în `data/overrides.json`.
 - Atribuire obligatorie în UI: „© OpenStreetMap contributors” (ODbL).
 - MapLibre 6: worker-ul se setează explicit în `src/map/worker.ts` (`?worker&url`), iar `maplibre-gl` e exclus din optimizeDeps.
