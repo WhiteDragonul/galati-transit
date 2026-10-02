@@ -1,6 +1,6 @@
 # Verificare date
 
-Rulat: 2026-10-02T08:18:14.958Z  
+Rulat: 2026-10-02T09:20:11.642Z  
 Date oficiale: `transurb-2026-10-02.json` (preluate 2026-10-02T07:48:07.287Z)
 
 **Rezultat: ✅ totul corespunde**
