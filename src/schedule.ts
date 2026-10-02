@@ -2,6 +2,7 @@
 import type { ScheduleFile } from '../shared/model.ts';
 import { DATA, type Line } from './data.ts';
 import { t } from './i18n.ts';
+import { dayIndex, isWeekdayLabel, isWeekend, isWeekendLabel } from './days.ts';
 
 const cache = new Map<string, Promise<ScheduleFile | null>>();
 
@@ -17,13 +18,9 @@ export function loadSchedule(line: Line): Promise<ScheduleFile | null> {
   return p;
 }
 
-const isWeekendLabel = (s: string) => /weekend|s[âa]mb[ăa]t|duminic/i.test(s);
-const isWeekdayLabel = (s: string) => /luni|lucr[ăa]toare/i.test(s);
-
 /** tipul de zi aplicabil azi (luni–vineri / weekend); sărbătorile legale nu sunt cunoscute */
 export function dayTypeIndexFor(dayTypes: string[], date = new Date()): number {
-  const weekend = date.getDay() === 0 || date.getDay() === 6;
-  const i = dayTypes.findIndex((d) => (weekend ? isWeekendLabel(d) : isWeekdayLabel(d)));
+  const i = dayIndex(dayTypes, isWeekend(date));
   return i >= 0 ? i : 0;
 }
 

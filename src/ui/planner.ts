@@ -1,10 +1,12 @@
-// Planificatorul de călătorie în panou: alegi stația de plecare și pe cea de sosire,
-// primești variantele (cu cât mai puține schimbări) și etapele fiecăreia.
+// Planificatorul de călătorie în panou: alegi stația de plecare, pe cea de sosire și ora,
+// primești variantele (cea mai devreme sosire, cu cât mai puține schimbări) și etapele fiecăreia.
+// Orele vin din orarul oficial; unde nu există curse, rămân variantele calculate fără orar.
 import { animate, stagger } from 'motion';
 import type { AppData } from '../data.ts';
+import { isWeekend } from '../days.ts';
 import { modeLabel, onLangChange, t } from '../i18n.ts';
-import { type Itinerary, type Network, plan, type Place } from '../plan.ts';
-import { dayTypeIndexFor, loadSchedule, upcoming } from '../schedule.ts';
+import { buildTimetable, type Itinerary, type Network, plan, planTimed, type Place, type Timetable } from '../plan.ts';
+import { dayTypeIndexFor, loadSchedule, nowMinutes, upcoming } from '../schedule.ts';
 import { DUR, EASE_OUT, reducedMotion } from '../motion/tokens.ts';
 import { getState, planFromHash, setState, subscribe, writeHash } from '../state.ts';
 import { $, BACK_ICON, badge, esc } from './dom.ts';
@@ -18,6 +20,8 @@ export interface PlannerHooks {
 
 type End = 'from' | 'to';
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const hm = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}`);
 
 const WALK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4.5" r="2"/><path d="M10 21l2-6 3 3v3M9.5 11.5 11 8l3 1 2 3 2.5 1M11 8l-2.5 1.5L7.5 13"/></svg>';
 const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v15M4.5 15.5 8 19l3.5-3.5M16 20V5M12.5 8.5 16 5l3.5 3.5"/></svg>';
@@ -33,13 +37,27 @@ export function planEnd(which: End, placeId: string) {
 export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
   const view = $('#view-plan');
   const ends: Record<End, Place | null> = { from: null, to: null };
+  /** „acum” urmează ceasul; altfel ora și tipul zilei alese de mână */
+  const when = { now: true, minutes: nowMinutes(), weekend: isWeekend(new Date()) };
   let options: Itinerary[] = [];
+  let timed = false; // rezultatele au ore
+  let loading = false;
   let selected = 0;
   let active: End | null = null; // câmpul cu sugestiile deschise
-  let token = 0;
+  let token = 0, searchToken = 0;
 
   const places = [...net.places.values()].filter((p) => p.name).sort((a, b) => a.name!.localeCompare(b.name!, 'ro'));
   const placeName = (id: string) => net.places.get(id)?.name ?? t('unnamedStop');
+
+  // orarele tuturor liniilor (~120 KB comprimat), încărcate o singură dată, la prima căutare
+  let schedules: Promise<Map<string, Awaited<ReturnType<typeof loadSchedule>>>> | null = null;
+  const tables = new Map<boolean, Timetable>();
+  async function timetable(weekend: boolean) {
+    schedules ??= Promise.all(data.lines.map(async (l) => [l.id, await loadSchedule(l)] as const)).then((e) => new Map(e));
+    const s = await schedules;
+    if (!tables.has(weekend)) tables.set(weekend, buildTimetable(data.lines, s, weekend));
+    return tables.get(weekend)!;
+  }
 
   function render() {
     view.innerHTML = `
@@ -58,6 +76,15 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
           </div>`).join('')}
         <button class="plan-swap" aria-label="${t('planSwap')}" title="${t('planSwap')}">${SWAP_ICON}</button>
         <ul class="plan-suggest" id="plan-suggest" role="listbox" hidden></ul>
+      </div>
+      <div class="plan-when">
+        <span class="plan-when-label">${t('planLeave')}</span>
+        <button class="chip" data-now aria-pressed="${when.now}">${t('planNow')}</button>
+        <input class="plan-time" type="time" aria-label="${t('planTimeLabel')}" value="${hm(when.minutes)}" />
+        <div class="plan-day" role="radiogroup" aria-label="${t('planDayLabel')}">
+          <button class="chip" role="radio" data-weekend="0" aria-checked="${!when.weekend}">${t('weekdays')}</button>
+          <button class="chip" role="radio" data-weekend="1" aria-checked="${when.weekend}">${t('weekend')}</button>
+        </div>
       </div>
       <div class="plan-results" aria-live="polite"></div>`;
 
@@ -107,7 +134,36 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
     view.addEventListener('pointerdown', (e) => {
       if (!(e.target as HTMLElement).closest('.plan-field, .plan-suggest')) closeSuggest();
     });
+
+    // ——— ora și ziua ———
+    $('[data-now]', view).addEventListener('click', () => {
+      setWhen({ now: true, minutes: nowMinutes(), weekend: isWeekend(new Date()) });
+      search();
+    });
+    $<HTMLInputElement>('.plan-time', view).addEventListener('change', (e) => {
+      const v = (e.target as HTMLInputElement).value;
+      if (!/^\d\d:\d\d$/.test(v)) return;
+      setWhen({ ...when, now: false, minutes: Number(v.slice(0, 2)) * 60 + Number(v.slice(3)) });
+      search();
+    });
+    view.querySelectorAll<HTMLButtonElement>('[data-weekend]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const weekend = b.dataset.weekend === '1';
+        if (weekend === when.weekend) return;
+        setWhen({ ...when, now: false, weekend });
+        search();
+      }),
+    );
     renderResults(false);
+  }
+
+  function setWhen(next: typeof when) {
+    Object.assign(when, next);
+    const root = view.querySelector('.plan-when');
+    if (!root) return;
+    $('[data-now]', root).setAttribute('aria-pressed', String(when.now));
+    $<HTMLInputElement>('.plan-time', root).value = hm(when.minutes);
+    root.querySelectorAll('[data-weekend]').forEach((b) => b.setAttribute('aria-checked', String((b as HTMLElement).dataset.weekend === (when.weekend ? '1' : '0'))));
   }
 
   function syncInputs() {
@@ -156,11 +212,25 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
     search();
   }
 
-  function search() {
+  async function search(depart?: number) {
+    const my = ++searchToken;
     const { from, to } = ends;
-    options = from && to && from !== to ? plan(net, from.id, to.id) : [];
-    selected = 0;
     if (getState().plan) writeHash(from && to ? `de=${encodeURIComponent(from.id)}&la=${encodeURIComponent(to.id)}` : '');
+    if (when.now && depart === undefined) setWhen({ now: true, minutes: nowMinutes(), weekend: isWeekend(new Date()) });
+    options = [];
+    selected = 0;
+    timed = false;
+    if (from && to && from !== to) {
+      loading = true;
+      renderResults(false);
+      const tt = await timetable(when.weekend);
+      if (my !== searchToken) return;
+      options = planTimed(net, tt, from.id, to.id, depart ?? when.minutes);
+      timed = options.length > 0;
+      // fără curse (ex. noaptea): rămân variantele după ordinea stațiilor, marcate ca atare
+      if (!timed) options = plan(net, from.id, to.id);
+    }
+    loading = false;
     renderResults(true);
     hooks.onItinerary(options[0] ?? null);
     if (options.length) hooks.onResults();
@@ -174,33 +244,46 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
   }
 
   function meta(it: Itinerary) {
-    const parts = [
+    return [
       it.rides === 0 ? t('planWalkOnly') : it.rides === 1 ? t('planDirect') : it.rides === 2 ? t('planOneChange') : t('planChanges', { n: it.rides - 1 }),
       ...(it.stops ? [it.stops === 1 ? t('oneStop') : t('nStops', { n: it.stops })] : []),
       ...(it.walkM ? [t('planWalkM', { m: it.walkM })] : []),
-    ];
-    return parts.join(' · ');
+    ].join(' · ');
   }
+
+  const time = (m: number | undefined) => (m === undefined ? '' : `<time>${hm(m)}</time> `);
 
   function legs(it: Itinerary) {
     return `<ol class="plan-legs">${it.legs
-      .map((l) => {
+      .map((l, i) => {
         if (l.kind === 'walk')
-          return `<li class="leg walk"><span class="leg-icon">${WALK_ICON}</span><p>${t('planWalkTo', { m: l.meters })} <b>${esc(placeName(l.to))}</b></p></li>`;
+          return `<li class="leg walk"><span class="leg-icon">${WALK_ICON}</span><p>${time(l.start)}${t('planWalkTo', { m: l.meters })} <b>${esc(placeName(l.to))}</b></p></li>`;
         const line = data.lineById.get(l.lineId)!;
         const v = net.variants.get(l.variantId)!;
         const n = l.toIndex - l.fromIndex;
+        // așteptarea la schimbare (după coborâre sau după drumul pe jos până la stație)
+        const before = it.legs[i - 1];
+        const ready = before?.kind === 'ride' ? before.arr : before?.kind === 'walk' && i > 1 ? before.end : undefined;
+        const wait = l.dep !== undefined && ready !== undefined ? l.dep - ready : 0;
         return `<li class="leg ride" style="--c:${data.colourOf(line.id)}">
+          ${wait > 0 ? `<p class="leg-wait">${t('planWait', { n: wait })}</p>` : ''}
           <button class="leg-line" data-line="${line.id}" data-variant="${v.id}">${badge(data, line, 'sm')}
             <span><b>${modeLabel(line.mode)} ${esc(line.ref)}</b>${v.to ? ` <span>${esc(t('towards', { to: v.to }))}</span>` : ''}</span></button>
           ${v.label ? `<p class="leg-label"><small class="pill">${esc(v.label)}</small></p>` : ''}
-          <p>${t('planBoard')} <b>${esc(v.stops[l.fromIndex].name ?? t('unnamedStop'))}</b></p>
+          <p>${time(l.dep)}${t('planBoard')} <b>${esc(v.stops[l.fromIndex].name ?? t('unnamedStop'))}</b></p>
           <p class="leg-count">${n === 1 ? t('oneStop') : t('nStops', { n })}</p>
-          <p>${t('planAlight')} <b>${esc(v.stops[l.toIndex].name ?? t('unnamedStop'))}</b></p>
-          <p class="leg-next" data-next="${l.variantId}:${l.fromIndex}" hidden></p>
+          <p>${time(l.arr)}${t('planAlight')} <b>${esc(v.stops[l.toIndex].name ?? t('unnamedStop'))}</b></p>
+          ${timed ? '' : `<p class="leg-next" data-next="${l.variantId}:${l.fromIndex}" hidden></p>`}
         </li>`;
       })
       .join('')}</ol>`;
+  }
+
+  function summary(it: Itinerary, i: number) {
+    const best = i === 0 && options.length > 1 ? `<b>${t('planBest')}</b> · ` : '';
+    if (!timed) return `<span class="plan-chain">${chain(it)}</span><span class="plan-meta">${best}${meta(it)}</span>`;
+    return `<span class="plan-times"><b>${hm(it.depart!)} → ${hm(it.arrive!)}</b><span>${duration(it.arrive! - it.depart!)}</span></span>
+      <span class="plan-chain">${chain(it)}</span><span class="plan-meta">${best}${meta(it)}</span>`;
   }
 
   function renderResults(animateIn: boolean) {
@@ -209,17 +292,18 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
     const { from, to } = ends;
     if (!from || !to) box.innerHTML = `<p class="plan-msg">${t('planHint')}</p>`;
     else if (from === to) box.innerHTML = `<p class="plan-msg">${t('planSame')}</p>`;
+    else if (loading) box.innerHTML = `<p class="plan-msg">${t('planLoadingTimes')}</p>`;
     else if (!options.length) box.innerHTML = `<p class="plan-msg">${t('planNone')}</p>`;
     else {
-      box.innerHTML = options
+      const head = timed ? '' : `<p class="plan-msg plan-warn">${t('planNoTrips', { time: hm(when.minutes), day: when.weekend ? t('weekend') : t('weekdays') })}</p>`;
+      box.innerHTML = head + options
         .map((it, i) => `<section class="plan-opt" aria-label="${t('planOption', { n: i + 1 })}"${i === selected ? ' data-open' : ''}>
-          <button class="plan-sum" data-opt="${i}" aria-expanded="${i === selected}">
-            <span class="plan-chain">${chain(it)}</span>
-            <span class="plan-meta">${i === 0 && options.length > 1 ? `<b>${t('planBest')}</b> · ` : ''}${meta(it)}</span>
-          </button>
+          <button class="plan-sum" data-opt="${i}" aria-expanded="${i === selected}">${summary(it, i)}</button>
           ${i === selected ? legs(it) : ''}
         </section>`)
-        .join('') + `<p class="plan-note">${t('planNote')}</p>`;
+        .join('')
+        + (timed ? `<button class="plan-later">${t('planLater')}</button>` : '')
+        + `<p class="plan-note">${timed ? t('planTimedNote') : t('planNote')}</p>`;
       box.querySelectorAll<HTMLButtonElement>('[data-opt]').forEach((b) =>
         b.addEventListener('click', () => {
           const i = Number(b.dataset.opt);
@@ -232,13 +316,19 @@ export function initPlanner(data: AppData, net: Network, hooks: PlannerHooks) {
       box.querySelectorAll<HTMLButtonElement>('.leg-line').forEach((b) =>
         b.addEventListener('click', () => setState({ lineId: b.dataset.line!, variantId: b.dataset.variant! })),
       );
-      nextDepartures(box);
+      // următoarea cursă: imediat după plecarea celei mai devreme variante
+      box.querySelector('.plan-later')?.addEventListener('click', () => {
+        const first = Math.min(...options.map((it) => it.legs.find((l) => l.kind === 'ride')?.dep ?? it.depart!));
+        setWhen({ ...when, now: false, minutes: first + 1 });
+        search(first + 1);
+      });
+      if (!timed) nextDepartures(box);
       if (animateIn && !reducedMotion())
         animate([...box.querySelectorAll('.plan-opt')], { opacity: [0, 1], transform: ['translateY(6px)', 'none'] }, { duration: DUR.base, delay: stagger(0.04), ease: EASE_OUT });
     }
   }
 
-  /** următoarele plecări din stația de urcare a primei curse (din orarul oficial, dacă există) */
+  /** fără orar pe traseu: măcar următoarele plecări din stația de urcare a primei curse */
   async function nextDepartures(box: HTMLElement) {
     const my = ++token;
     const el = box.querySelector<HTMLElement>('[data-next]');

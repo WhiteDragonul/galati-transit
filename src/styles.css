@@ -244,6 +244,22 @@ button { font: inherit; color: inherit; }
 .plan-slines small { font-size: 11px; color: var(--ink-3); }
 .plan-empty { padding: 10px; font-size: 13px; color: var(--ink-2); }
 
+.plan-when { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 14px 0; }
+.plan-when-label { font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 2px; }
+.plan-when .chip[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.plan-time { height: 32px; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: inherit; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); }
+.plan-time:focus-visible { outline: 2.5px solid var(--focus); outline-offset: 1px; }
+.plan-day { display: flex; gap: 4px; margin-left: auto; }
+.plan-when .chip { height: 32px; padding: 0 10px; font-size: 12.5px; }
+.plan-times { display: flex; align-items: baseline; gap: 8px; }
+.plan-times b { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.plan-times span { font-size: 13px; color: var(--ink-2); }
+.plan-warn { padding: 8px 10px; margin: 0; border-radius: 10px; background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-ink); font-size: 12.5px; }
+.leg time { font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 2px; }
+.leg-wait { margin: 0 0 6px -40px !important; padding-left: 40px; font-size: 12px; color: var(--ink-3); font-style: italic; }
+.plan-later { align-self: center; height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.16s; }
+.plan-later:hover { background: var(--surface-2); }
+
 .plan-results { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 20px; }
 .plan-msg { margin: 6px 4px; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
 .plan-opt { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }

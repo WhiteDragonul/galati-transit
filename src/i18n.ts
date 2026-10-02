@@ -100,6 +100,15 @@ const ro = {
   planFromHere: 'De aici',
   planToHere: 'Până aici',
   planOption: 'Varianta {n}',
+  planLeave: 'Plecare',
+  planNow: 'Acum',
+  planTimeLabel: 'Ora de plecare',
+  planDayLabel: 'Tipul zilei',
+  planWait: 'Aștepți {n} min',
+  planLater: 'Curse mai târziu',
+  planLoadingTimes: 'Se încarcă orarele…',
+  planNoTrips: 'Nicio cursă după {time} ({day}) pe acest traseu. Variantele de mai jos nu țin cont de orar.',
+  planTimedNote: 'Orele vin din orarul oficial; întârzierile și sărbătorile legale nu sunt luate în calcul, iar drumul pe jos e estimat.',
 };
 type Key = keyof typeof ro;
 
@@ -199,6 +208,15 @@ const en: Record<Key, string> = {
   planFromHere: 'From here',
   planToHere: 'To here',
   planOption: 'Option {n}',
+  planLeave: 'Leave',
+  planNow: 'Now',
+  planTimeLabel: 'Departure time',
+  planDayLabel: 'Type of day',
+  planWait: 'Wait {n} min',
+  planLater: 'Later trips',
+  planLoadingTimes: 'Loading timetables…',
+  planNoTrips: 'No trips after {time} ({day}) on this route. The options below do not use the timetable.',
+  planTimedNote: 'Times come from the official timetable; delays and public holidays are not taken into account, and walking times are estimates.',
 };
 
 const DICT: Record<Lang, Record<Key, string>> = { ro, en };

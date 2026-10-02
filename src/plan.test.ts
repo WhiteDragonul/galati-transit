@@ -2,8 +2,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import type { LinesFile } from '../shared/model.ts';
-import { buildNetwork, plan } from './plan.ts';
+import type { LinesFile, ScheduleFile } from '../shared/model.ts';
+import { buildNetwork, buildTimetable, plan, planTimed } from './plan.ts';
 
 const lines = (JSON.parse(readFileSync('public/data/lines.json', 'utf8')) as LinesFile).lines;
 const stops = JSON.parse(readFileSync('public/data/stops.geojson', 'utf8')).features;
@@ -50,6 +50,53 @@ test('fiecare traseu e coerent: etapele se leagă, cursele urmează ordinea vari
       // ordonate după cost; mai multe curse doar dacă e mai scurt
       for (let k = 1; k < opts.length; k++) assert.ok(opts[k - 1].cost <= opts[k].cost);
     }
+});
+
+const schedules = new Map(lines.map((l) => [l.id, l.scheduleFile ? (JSON.parse(readFileSync(`public/data/${l.scheduleFile}`, 'utf8')) as ScheduleFile) : null]));
+const weekday = buildTimetable(lines, schedules, false);
+
+test('cu orar: orele se leagă (urci după ce ajungi, cobori după ce urci, schimbarea are timp)', () => {
+  const ids = [...net.places.keys()];
+  let found = 0;
+  for (let i = 0; i < ids.length; i += 11)
+    for (let j = 4; j < ids.length; j += 19) {
+      if (ids[i] === ids[j]) continue;
+      for (const it of planTimed(net, weekday, ids[i], ids[j], 8 * 60)) {
+        found++;
+        let t = 8 * 60;
+        for (const l of it.legs) {
+          if (l.kind === 'ride') {
+            assert.ok(l.dep! >= t, `urcare ${l.dep} înainte de ${t}`);
+            assert.ok(l.arr! > l.dep!);
+            const cols = weekday.get(l.variantId)!;
+            assert.ok(cols[l.fromIndex].includes(l.dep!) && cols[l.toIndex].includes(l.arr!), 'orele vin din orar');
+            t = l.arr! + 2;
+          } else {
+            assert.ok(l.start! >= 8 * 60 - 0 && l.end! > l.start!);
+            t = l.end!;
+          }
+        }
+        assert.ok(it.arrive! >= it.depart! && it.depart! >= 8 * 60);
+      }
+    }
+  assert.ok(found > 50, `prea puține rezultate cu orar (${found})`);
+});
+
+test('cu orar: rezultatele sunt ordonate după sosire; noaptea târziu nu se inventează curse', () => {
+  const v = lines.find((l) => l.id === 'tram-7')!.variants[0];
+  const a = net.seq.get(v.id)![0]!, b = net.seq.get(v.id)![5]!;
+  const day = planTimed(net, weekday, a, b, 7 * 60);
+  assert.ok(day.length);
+  for (let k = 1; k < day.length; k++) assert.ok(day[k - 1].arrive! <= day[k].arrive!);
+  assert.deepEqual(planTimed(net, weekday, a, b, 23 * 60 + 59).filter((it) => it.rides > 0), []);
+});
+
+test('cu orar: liniile fără orar de weekend nu circulă în weekend', () => {
+  const weekend = buildTimetable(lines, schedules, true);
+  for (const l of lines) {
+    const sch = schedules.get(l.id);
+    if (sch && !sch.dayTypes.some((d) => /weekend/i.test(d))) for (const v of l.variants) assert.equal(weekend.get(v.id), null);
+  }
 });
 
 test('aceeași stație sau stație necunoscută: niciun rezultat', () => {

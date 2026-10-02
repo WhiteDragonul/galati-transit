@@ -11,7 +11,7 @@
 
 - **Harta**: toată rețeaua, pe o hartă 3D a orașului, cu fiecare linie în culoarea ei.
 - **Liniile**: alegi o linie și vezi traseul, stațiile în ordine pe tur și retur și capetele.
-- **Cum ajung?**: alegi stația de plecare și pe cea de sosire și primești traseul cu cât mai puține schimbări (inclusiv cu mai multe linii), cu etapele pe hartă.
+- **Cum ajung?**: alegi stația de plecare și pe cea de sosire și primești traseul cu ora de plecare și de sosire, din orarul oficial (inclusiv cu schimbări între linii), cu etapele pe hartă.
 - **Orarele**: orarul oficial pentru fiecare stație (luni–vineri / weekend) și următoarea plecare.
 - **Pe telefon**: gândită în primul rând pentru telefon, fără instalare.
 - **Date verificate**: datele se compară automat cu site-ul operatorului. Ce lipsește sau e calculat este marcat clar.
@@ -39,7 +39,7 @@ npm run dev        # http://localhost:5173
 - **Hartă**: MapLibre GL JS, stil OpenFreeMap Positron, clădiri 3D (`fill-extrusion`) de la zoom 12.
 - **Panou**: pe desktop e în stânga; pe telefon (sub 768 px) devine un bottom sheet cu trei poziții, tras cu degetul.
 - **Link direct** către o linie: `/#linie=bus-9` (id-urile sunt în `public/data/lines.json`). Un traseu din planificator: `/#de=<groupId>&la=<groupId>` (id-urile de grup sunt în `public/data/stops.geojson`).
-- **Planificator** (`src/plan.ts`): caută după ordinea stațiilor pe fiecare variantă, în sensul de mers, nu după orar. Preferă mai puține schimbări, apoi mai puține stații; permite drumuri scurte pe jos (până la 400 m în linie dreaptă) între stații apropiate. O variantă cu o schimbare în plus apare doar dacă scurtează vizibil drumul. Distanțele pe jos sunt estimate (linie dreaptă × 1,25), iar UI-ul spune asta.
+- **Planificator** (`src/plan.ts`): `planTimed` caută cea mai devreme sosire după orarul oficial (ora și tipul zilei se aleg; „Acum” implicit), urmărind fiecare cursă din stație în stație; schimbarea are minim 2 minute. Dacă nu mai sunt curse (ex. noaptea), rămâne `plan`, care caută după ordinea stațiilor pe fiecare variantă, în sensul de mers, și UI-ul spune că nu ține cont de orar. Preferă mai puține schimbări, apoi mai puține stații; permite drumuri scurte pe jos (până la 400 m în linie dreaptă) între stații apropiate. O variantă cu o schimbare în plus apare doar dacă scurtează vizibil drumul. Distanțele pe jos sunt estimate (linie dreaptă × 1,25), iar UI-ul spune asta.
 - **Linii cu date incomplete**: traseu punctat pe hartă, eticheta „incomplet” în listă și un bloc explicativ în detaliu, cu link spre relația OSM.
 - **Culori**: OSM nu are culori pentru liniile din Galați, deci UI-ul folosește o paletă de rezervă. Culorile oficiale se pun în `overrides.json`.
 
