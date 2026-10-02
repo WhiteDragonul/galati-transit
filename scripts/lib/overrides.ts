@@ -33,7 +33,12 @@ export function applyOverrides(data: SourceResult, ov: Overrides): string[] {
   for (const [id, o] of Object.entries(ov.stops ?? {})) {
     const s = data.stops.get(id);
     if (!s) { log.push(`⚠ override pentru stația inexistentă "${id}"`); continue; }
-    if (o.name) { s.name = o.name; s.nameFrom = 'override'; log.push(`stația ${id}: nume "${o.name}"`); }
+    if (o.name) {
+      s.name = o.name;
+      s.nameFrom = 'override';
+      for (const l of data.lines) for (const v of l.variants) for (const vs of v.stops) if (vs.stopId === id) vs.name = o.name;
+      log.push(`stația ${id}: nume "${o.name}"`);
+    }
   }
   return log;
 }

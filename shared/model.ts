@@ -1,8 +1,8 @@
 // Modelul de date comun între scripturi și frontend.
-// Orice sursă (OSM, GTFS, overrides) produce exact aceste forme.
+// Orice sursă (OSM, Transurb, GTFS, overrides) produce exact aceste forme.
 
 export type Mode = 'bus' | 'trolleybus' | 'tram';
-export type Source = 'osm' | 'gtfs' | 'override';
+export type Source = 'osm' | 'transurb' | 'gtfs' | 'override';
 export type Direction = 'tur' | 'retur';
 
 export type IssueCode =
@@ -14,7 +14,10 @@ export type IssueCode =
   | 'extra_variants'
   | 'no_colour'
   | 'no_master'
-  | 'terminal_mismatch';
+  | 'terminal_mismatch'
+  | 'unmatched_stops' // stații oficiale fără poziție în OSM
+  | 'route_mismatch' // traseul din OSM nu acoperă bine stațiile oficiale
+  | 'no_schedule';
 
 export interface Issue {
   code: IssueCode;
@@ -23,21 +26,39 @@ export interface Issue {
   message: string; // text în română, afișabil direct în UI
 }
 
+export interface VariantStop {
+  /** numele afișat: din OSM când stația e potrivită (are diacritice), altfel numele oficial */
+  name: string;
+  /** numele exact de pe site-ul operatorului (null dacă sursa e doar OSM) */
+  officialName: string | null;
+  /** stația OSM (poziție pe hartă); null = nu are poziție cunoscută */
+  stopId: string | null;
+}
+
 export interface Variant {
-  id: string; // ex. "osm:r123456"
+  id: string; // ex. "tb:9:v1:tur" sau "osm:r123456"
   lineId: string;
   name: string | null;
-  from: string | null; // tag-ul from= din sursă
-  to: string | null; // tag-ul to= din sursă
+  /** eticheta variantei de serviciu, ex. „Sâmbătă, duminică și sărbători legale către Grădina Publică” */
+  label: string | null;
+  from: string | null;
+  to: string | null;
   direction: Direction | null;
-  /** cum s-a stabilit direcția: 'role' din route_master, 'order' = ordinea membrilor, 'override' */
-  directionSource: 'role' | 'order' | 'override' | null;
-  stopIds: string[]; // ordonate
-  /** lungimea traseului în metri (doar segmentele existente) */
+  /** 'official' = de pe site-ul operatorului, 'role'/'order' = dedus din OSM, 'override' */
+  directionSource: 'official' | 'role' | 'order' | 'override' | null;
+  stops: VariantStop[]; // ordonate
+  /** id-urile stațiilor cu poziție, în ordine (derivat din stops) */
+  stopIds: string[];
+  /** relația OSM din care vine geometria (poate diferi de sursa stațiilor) */
+  geometryRef: string | null;
+  /** câte stații oficiale au fost găsite, în ordine, pe traseul OSM (0..1); null dacă nu e cazul */
+  geometryMatch: number | null;
   lengthM: number;
   gaps: { count: number; maxM: number };
+  /** indexul variantei în fișierul de orar al liniei; null = fără orar */
+  scheduleKey: string | null;
   source: Source;
-  sourceRef: string; // ex. "relation/123456"
+  sourceRef: string;
   issues: Issue[];
 }
 
@@ -49,6 +70,12 @@ export interface Line {
   name: string | null;
   operator: string | null;
   network: string | null;
+  /** 'urban' / 'extraurban' (de pe site-ul operatorului) */
+  section: 'urban' | 'extraurban' | null;
+  /** pagina oficială a liniei */
+  officialUrl: string | null;
+  /** fișier cu orare, relativ la /data/ (ex. "schedules/bus-9.json") */
+  scheduleFile: string | null;
   variants: Variant[];
   source: Source;
   sourceRef: string | null;
@@ -76,6 +103,20 @@ export interface RouteProps {
 export interface LinesFile {
   generatedAt: string;
   sourceTimestamp: string | null;
+  /** când au fost descărcate datele operatorului (null = nu sunt folosite) */
+  officialFetchedAt: string | null;
+  officialSource: string | null;
   attribution: string;
   lines: Line[];
+}
+
+/** public/data/schedules/<lineId>.json */
+export interface ScheduleFile {
+  lineId: string;
+  fetchedAt: string;
+  source: string;
+  /** tipurile de zi, în ordinea de pe site (ex. „De luni până vineri”, „Weekend și sărbători legale”) */
+  dayTypes: string[];
+  /** scheduleKey → pentru fiecare stație a variantei (aliniat cu Variant.stops): orele pe tip de zi */
+  variants: Record<string, { stops: { url: string; times: string[][] }[] }>;
 }

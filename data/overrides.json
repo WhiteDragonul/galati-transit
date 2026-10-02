@@ -1,9 +1,6 @@
 {
   "includeNetworks": ["Transurb"],
   "lines": {},
-  "variants": {
-    "osm:r395899": { "hidden": true },
-    "osm:r396132": { "hidden": true }
-  },
+  "variants": {},
   "stops": {}
 }

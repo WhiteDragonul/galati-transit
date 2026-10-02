@@ -1,7 +1,7 @@
 // Transformă cel mai recent fișier din data/raw/ (+ data/overrides.json) în datele frontendului
 // și scrie raportul de calitate data/report.md.
 // Rulare: npm run data:build
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature, FeatureCollection, LineString, MultiLineString, Point } from 'geojson';
 import type { LinesFile, RouteProps, StopProps } from '../shared/model.ts';
@@ -11,14 +11,15 @@ import { computeIssues } from './lib/quality.ts';
 import { writeReport } from './lib/report.ts';
 import type { StopRecord } from './lib/types.ts';
 import { fromOsm, type OsmRaw } from './sources/osm.ts';
+import { mergeTransurb } from './sources/transurb.ts';
+import type { TransurbRaw } from './lib/transurb-types.ts';
 
 const ATTRIBUTION = '© OpenStreetMap contributors (ODbL)';
 const GROUP_RADIUS_M = 300;
 
-async function latestRaw(): Promise<string> {
-  const files = (await readdir('data/raw')).filter((f) => /^osm-.*\.json$/.test(f)).sort();
-  if (!files.length) throw new Error('Nu există date brute. Rulează întâi: npm run data:fetch');
-  return path.join('data/raw', files[files.length - 1]);
+async function latestRaw(prefix: string): Promise<string | null> {
+  const files = (await readdir('data/raw')).filter((f) => f.startsWith(`${prefix}-`) && f.endsWith('.json')).sort();
+  return files.length ? path.join('data/raw', files[files.length - 1]) : null;
 }
 
 /** stațiile cu același nume aflate la < GROUP_RADIUS_M una de alta formează un grup (ex. cele două sensuri) */
@@ -36,12 +37,18 @@ function groupStops(stops: Map<string, StopRecord>): Map<string, string> {
 }
 
 async function main() {
-  const rawFile = await latestRaw();
-  console.log(`Sursă: ${rawFile}`);
+  const rawFile = await latestRaw('osm');
+  if (!rawFile) throw new Error('Nu există date OSM. Rulează întâi: npm run data:fetch');
+  const tbFile = await latestRaw('transurb');
+  console.log(`Surse: ${rawFile}${tbFile ? `, ${tbFile}` : ' (fără date Transurb: rulează npm run data:fetch-transurb)'}`);
   const raw: OsmRaw = JSON.parse(await readFile(rawFile, 'utf8'));
+  const tb: TransurbRaw | null = tbFile ? JSON.parse(await readFile(tbFile, 'utf8')) : null;
   const overrides: Overrides = JSON.parse(await readFile('data/overrides.json', 'utf8'));
 
-  const data = fromOsm(raw, overrides.includeNetworks);
+  const osm = fromOsm(raw, overrides.includeNetworks);
+  // cu date oficiale: Transurb dă liniile, stațiile și orarele; OSM doar geometria și pozițiile
+  const merged = tb ? mergeTransurb(osm, tb) : null;
+  const data = merged?.data ?? osm;
   const overrideLog = applyOverrides(data, overrides);
   computeIssues(data);
 
@@ -62,6 +69,8 @@ async function main() {
   const linesFile: LinesFile = {
     generatedAt: new Date().toISOString(),
     sourceTimestamp: data.sourceTimestamp,
+    officialFetchedAt: tb?.fetchedAt ?? null,
+    officialSource: tb?.source ?? null,
     attribution: ATTRIBUTION,
     lines: data.lines,
   };
@@ -88,10 +97,17 @@ async function main() {
   await writeFile(path.join(out, 'lines.json'), JSON.stringify(linesFile));
   await writeFile(path.join(out, 'routes.geojson'), JSON.stringify(fc(routeFeatures)));
   await writeFile(path.join(out, 'stops.geojson'), JSON.stringify(fc(stopFeatures)));
-  await writeReport('data/report.md', data, { rawFile, overrideLog, attribution: ATTRIBUTION });
+  if (merged) {
+    await rm(path.join(out, 'schedules'), { recursive: true, force: true });
+    await mkdir(path.join(out, 'schedules'), { recursive: true });
+    const kept = new Set(data.lines.map((l) => l.id));
+    for (const sch of merged.schedules) if (kept.has(sch.lineId)) await writeFile(path.join(out, 'schedules', `${sch.lineId}.json`), JSON.stringify(sch));
+  }
+  await writeReport('data/report.md', data, { rawFile, tbFile, notes: merged?.notes ?? null, overrideLog, attribution: ATTRIBUTION });
 
   console.log(`✓ ${data.lines.length} linii, ${routeFeatures.length} variante cu geometrie, ${stopFeatures.length} stații`);
-  console.log(`✓ ${data.excluded.length} rute excluse (alți operatori)`);
+  console.log(`✓ ${data.excluded.length} rute OSM excluse (alți operatori)`);
+  if (merged) console.log(`✓ ${merged.schedules.length} fișiere de orar; ${merged.notes.notOnOfficialSite.length} linii OSM care nu mai apar în programul Transurb`);
   console.log('✓ public/data/{lines.json,routes.geojson,stops.geojson}, data/report.md');
 }
 
