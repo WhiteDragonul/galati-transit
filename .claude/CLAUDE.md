@@ -14,3 +14,4 @@ Hartă 3D a transportului public din Galați (Transurb). Prototip static: fără
 - Nu folosi `Get-Content`/`Set-Content` din PowerShell 5.1 pe fișiere UTF-8 fără BOM (strică diacriticele).
 - Verificare vizuală: `npm run dev` + `npm run snapshot` (Edge headless prin playwright-core).
 - Commit-uri mici, mesaje în engleză; README în română.
+- Trailer: `trailer/` (timeline determinist `renderAt(t)`), `npm run trailer:assets` + `npm run trailer:render` → MP4 H.264 codat în browser (WebCodecs + mp4-muxer, fără ffmpeg).
