@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Galați Transit Atlas — trailer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=block" rel="stylesheet" />
+    <link rel="stylesheet" href="./trailer.css" />
+  </head>
+  <body>
+    <div id="stage">
+      <svg id="net" viewBox="0 0 1920 1080" aria-hidden="true"><g id="net-casing"></g><g id="net-lines"></g></svg>
+      <div id="halo"></div>
+
+      <!-- 1. titlu -->
+      <section id="s-title" class="layer center">
+        <div class="mark"><svg viewBox="0 0 32 32"><path d="M6 22c3-8 8-12 20-12" /><path d="M6 12c6 0 10 4 20 10" /><circle cx="6" cy="22" r="2.6" /><circle cx="26" cy="10" r="2.6" /><circle cx="6" cy="12" r="2.6" /><circle cx="26" cy="22" r="2.6" /></svg></div>
+        <h1 class="mask"><span>Galați</span></h1>
+        <p class="mask sub"><span>Atlasul transportului public</span></p>
+      </section>
+
+      <!-- 2. cifre -->
+      <section id="s-stats" class="layer center">
+        <div class="stats">
+          <div class="stat"><b data-to="30">0</b><span>linii Transurb</span></div>
+          <div class="stat"><b data-to="238">0</b><span>stații pe hartă</span></div>
+          <div class="stat"><b data-to="73450">0</b><span>ore de plecare din orarul oficial</span></div>
+        </div>
+        <p class="tagline mask"><span>Toate, într-o singură hartă.</span></p>
+      </section>
+
+      <!-- 3–5. laptop -->
+      <section id="s-laptop" class="layer">
+        <div class="laptop">
+          <div class="screen"><div class="viewport">
+            <img data-shot="home" src="./assets/desktop-home.png" alt="" />
+            <img data-shot="line" src="./assets/desktop-line.png" alt="" />
+            <img data-shot="tt" src="./assets/desktop-timetable.png" alt="" />
+          </div></div>
+          <div class="base"></div>
+        </div>
+      </section>
+
+      <!-- 6. telefoane -->
+      <section id="s-phones" class="layer">
+        <div class="phone p1"><img src="./assets/phone-list.png" alt="" /></div>
+        <div class="phone p2"><img src="./assets/phone-timetable.png" alt="" /></div>
+      </section>
+
+      <!-- 7. date -->
+      <section id="s-data" class="layer">
+        <ul class="checks">
+          <li><i></i><div><b>Date oficiale</b><span>Linii, stații, tur/retur și orare preluate de pe transurbgalati.ro</span></div></li>
+          <li><i></i><div><b>Hartă deschisă</b><span>Trasee și poziții din OpenStreetMap</span></div></li>
+          <li><i></i><div><b>Verificare automată</b><span>Fiecare actualizare e comparată cu site-ul operatorului</span></div></li>
+          <li><i></i><div><b>Fără date inventate</b><span>Ce lipsește sau e calculat este marcat clar</span></div></li>
+        </ul>
+      </section>
+
+      <!-- legende pentru scenele 3–7 -->
+      <aside class="caption" data-scene="map"><p class="kicker">01 · Harta</p><h2 class="words">Toată rețeaua Transurb, pe o hartă 3D a orașului</h2></aside>
+      <aside class="caption" data-scene="line"><p class="kicker">02 · Liniile</p><h2 class="words">Alegi o linie: vezi traseul, stațiile pe tur și retur și capetele</h2></aside>
+      <aside class="caption" data-scene="tt"><p class="kicker">03 · Orarele</p><h2 class="words">Orarul oficial al fiecărei stații și următoarea plecare</h2></aside>
+      <aside class="caption" data-scene="phone"><p class="kicker">04 · Pe telefon</p><h2 class="words">Gândit pentru telefon, acolo unde călătorii au nevoie de el</h2></aside>
+      <aside class="caption" data-scene="data"><p class="kicker">05 · Date de încredere</p><h2 class="words">Construit din surse publice, verificat automat</h2></aside>
+
+      <!-- 8. final -->
+      <section id="s-end" class="layer center">
+        <div class="mark"><svg viewBox="0 0 32 32"><path d="M6 22c3-8 8-12 20-12" /><path d="M6 12c6 0 10 4 20 10" /><circle cx="6" cy="22" r="2.6" /><circle cx="26" cy="10" r="2.6" /><circle cx="6" cy="12" r="2.6" /><circle cx="26" cy="22" r="2.6" /></svg></div>
+        <h1 class="mask"><span>Galați Transit Atlas</span></h1>
+        <p class="mask sub"><span id="end-line">Prototip · propunere pentru Primăria Municipiului Galați</span></p>
+        <p class="credits">Date: transurbgalati.ro · © OpenStreetMap contributors (ODbL) · OpenMapTiles · OpenFreeMap</p>
+      </section>
+
+      <div class="wipe" id="wipe-1"><i></i></div>
+      <div class="wipe ink" id="wipe-2"><i></i></div>
+      <div id="fade"></div>
+    </div>
+    <script type="module" src="./trailer.ts"></script>
+  </body>
+</html>

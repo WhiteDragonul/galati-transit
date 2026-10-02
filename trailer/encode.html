@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ro">
+  <head><meta charset="UTF-8" /><title>encoder</title></head>
+  <body>
+    <script type="module">
+      // Codează în MP4 (H.264) cadrele trimise de scripts/trailer/render.ts, cu WebCodecs + mp4-muxer.
+      import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
+      let muxer, encoder, fps;
+      window.setup = async ({ width, height, fps: f, bitrate }) => {
+        fps = f;
+        muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: 'avc', width, height, frameRate: fps }, fastStart: 'in-memory' });
+        encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: (e) => { window.__err = String(e); } });
+        encoder.configure({ codec: 'avc1.640028', width, height, bitrate, framerate: fps, bitrateMode: 'variable', latencyMode: 'quality', avc: { format: 'avc' } });
+        return true;
+      };
+      window.addFrame = async (dataUrl, i) => {
+        const bmp = await createImageBitmap(await (await fetch(dataUrl)).blob());
+        const frame = new VideoFrame(bmp, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) });
+        encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 });
+        frame.close();
+        bmp.close();
+        while (encoder.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 5));
+        if (window.__err) throw new Error(window.__err);
+      };
+      window.finish = async () => {
+        await encoder.flush();
+        muxer.finalize();
+        const buf = new Uint8Array(muxer.target.buffer);
+        let s = '';
+        for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      window.__encoderReady = true;
+    </script>
+  </body>
+</html>
