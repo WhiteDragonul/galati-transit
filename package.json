@@ -2,6 +2,14 @@
   "name": "galati-transit",
   "private": true,
   "version": "0.1.0",
+  "description": "Hartă 3D interactivă, open source, a transportului public din Galați (Transurb)",
+  "license": "MIT",
+  "author": "WhiteDragonul",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WhiteDragonul/galati-transit.git"
+  },
+  "homepage": "https://whitedragonul.github.io/galati-transit/",
   "type": "module",
   "scripts": {
     "dev": "vite",

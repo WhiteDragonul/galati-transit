@@ -1,6 +1,6 @@
 // Orare oficiale: încărcare leneșă pe linie + calcule de „următoarea plecare”.
 import type { ScheduleFile } from '../shared/model.ts';
-import type { Line } from './data.ts';
+import { DATA, type Line } from './data.ts';
 
 const cache = new Map<string, Promise<ScheduleFile | null>>();
 
@@ -8,7 +8,7 @@ export function loadSchedule(line: Line): Promise<ScheduleFile | null> {
   if (!line.scheduleFile) return Promise.resolve(null);
   let p = cache.get(line.id);
   if (!p) {
-    p = fetch(`/data/${line.scheduleFile}`)
+    p = fetch(`${DATA}${line.scheduleFile}`)
       .then((r) => (r.ok ? (r.json() as Promise<ScheduleFile>) : null))
       .catch(() => null);
     cache.set(line.id, p);

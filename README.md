@@ -1,9 +1,28 @@
 # Galați Transit Atlas
 
-Hartă 3D interactivă a liniilor de transport public din Galați (Transurb: autobuz, troleibuz, tramvai).
-Prototip static: fără backend, datele sunt fișiere JSON/GeoJSON generate din OpenStreetMap.
+[![CI](https://github.com/WhiteDragonul/galati-transit/actions/workflows/ci.yml/badge.svg)](https://github.com/WhiteDragonul/galati-transit/actions/workflows/ci.yml)
+[![Licență: MIT](https://img.shields.io/badge/licen%C8%9B%C4%83-MIT-blue.svg)](LICENSE)
 
-Date: © OpenStreetMap contributors, licență [ODbL](https://opendatacommons.org/licenses/odbl/).
+**Hartă 3D interactivă, open source, a transportului public din Galați:** toate cele 30 de linii Transurb (autobuz, troleibuz, tramvai), stațiile pe tur și retur și orarul oficial al fiecărei stații, cu următoarea plecare.
+
+**[Deschide aplicația →](https://whitedragonul.github.io/galati-transit/)**
+
+![Galați Transit Atlas](trailer/galati-transit-atlas-poster.png)
+
+- **Harta**: toată rețeaua, pe o hartă 3D a orașului, cu fiecare linie în culoarea ei.
+- **Liniile**: alegi o linie și vezi traseul, stațiile în ordine pe tur și retur și capetele.
+- **Orarele**: orarul oficial pentru fiecare stație (luni–vineri / weekend) și următoarea plecare.
+- **Pe telefon**: gândită în primul rând pentru telefon, fără instalare.
+- **Date verificate**: datele se compară automat cu site-ul operatorului. Ce lipsește sau e calculat este marcat clar.
+
+Este un **prototip independent**, nu o aplicație oficială TRANSURB S.A. sau a Primăriei Galați.
+
+## Licență și date
+
+- **Cod**: [MIT](LICENSE). Îl poți folosi, modifica și redistribui liber.
+- **Date**: nu sunt sub MIT. Traseele și pozițiile vin din © OpenStreetMap contributors (ODbL). Liniile, stațiile oficiale și orarele vin de pe transurbgalati.ro (© TRANSURB S.A.). Detalii în [DATA_LICENSES.md](DATA_LICENSES.md).
+
+Contribuțiile sunt binevenite: deschide un issue sau un pull request. Cea mai utilă contribuție pentru date e direct în [OpenStreetMap](https://www.openstreetmap.org/): de exemplu, adăugarea relațiilor pentru liniile 1 și 2.
 
 ## Cerințe
 

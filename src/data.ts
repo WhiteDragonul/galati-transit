@@ -28,13 +28,16 @@ const FALLBACK: Record<Mode, string[]> = {
   ],
 };
 
+/** baza datelor statice; pe GitHub Pages aplicația nu stă la rădăcina domeniului */
+export const DATA = `${import.meta.env.BASE_URL}data/`;
+
 export const MODE_LABEL: Record<Mode, string> = { tram: 'Tramvai', trolleybus: 'Troleibuz', bus: 'Autobuz' };
 
 export async function loadData(): Promise<AppData> {
   const [linesFile, routes, stops] = await Promise.all([
-    fetch('/data/lines.json').then((r) => r.json() as Promise<LinesFile>),
-    fetch('/data/routes.geojson').then((r) => r.json()),
-    fetch('/data/stops.geojson').then((r) => r.json()),
+    fetch(`${DATA}lines.json`).then((r) => r.json() as Promise<LinesFile>),
+    fetch(`${DATA}routes.geojson`).then((r) => r.json()),
+    fetch(`${DATA}stops.geojson`).then((r) => r.json()),
   ]);
   const { lines, ...meta } = linesFile;
   const lineById = new Map(lines.map((l) => [l.id, l]));
