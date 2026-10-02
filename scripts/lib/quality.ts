@@ -18,11 +18,13 @@ export function computeIssues(data: SourceResult) {
     for (const v of line.variants) {
       const vi: Issue[] = [];
       const segs = data.geometries.get(v.id) ?? [];
+      if (v.geometrySource === 'routed')
+        vi.push({ code: 'routed_geometry', severity: 'info', message: 'Traseu calculat pe străzi prin stațiile oficiale, în ordine (OpenStreetMap nu are încă relația acestei linii); pe porțiuni poate diferi de drumul real' });
       if (!segs.length)
         vi.push({ code: 'no_geometry', severity: 'warn', message: official ? 'Traseul nu există (sau diferă mult) în OpenStreetMap; nu poate fi desenat pe hartă' : 'Traseul nu are geometrie' });
       else if (v.gaps.count && v.gaps.maxM > GAP_TOLERANCE_M)
         vi.push({ code: 'geometry_gaps', severity: 'warn', message: `Traseu întrerupt în OSM (${v.gaps.count} goluri, cel mai mare ${v.gaps.maxM} m)` });
-      if (segs.length && v.geometryMatch !== null && v.geometryMatch < ROUTE_MATCH_WARN)
+      if (segs.length && v.geometrySource === 'osm' && v.geometryMatch !== null && v.geometryMatch < ROUTE_MATCH_WARN)
         vi.push({ code: 'route_mismatch', severity: 'warn', message: `Desenul din OSM acoperă doar ${Math.round(v.geometryMatch * 100)}% din stațiile oficiale; traseul real poate diferi` });
       if (!v.stops.length) vi.push({ code: 'no_stops', severity: 'warn', message: 'Varianta nu are stații' });
       const unplaced = v.stops.filter((s) => !s.stopId).length;

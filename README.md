@@ -59,12 +59,22 @@ O stație fără corespondent sigur rămâne **fără poziție** și apare marca
 
 ```powershell
 npm run data:fetch            # OSM → data/raw/osm-YYYY-MM-DD.json
+npm run data:fetch-roads      # străzile din Galați (OSM) → data/raw/roads-YYYY-MM-DD.json
 npm run data:fetch-transurb   # site Transurb → data/raw/transurb-YYYY-MM-DD.json (~960 pagini, 3 cereri simultan, cu cache)
 npm run data:build            # → public/data/* (+ schedules/<linie>.json) și data/report.md
 npm run data:verify           # verificări + comparație cu site-ul live → data/verify.md
-npm run data                  # toate patru
+npm run data                  # toate
 npm test                      # teste pentru potrivirea numelor de stații
 ```
+
+**Linii pe care OSM nu le are** (de ex. liniile noi 1 și 2): traseul e calculat pe rețeaua de străzi OSM (`scripts/lib/router.ts`, Dijkstra).
+Calculul respectă sensurile unice, preferă străzile pe care circulă deja transport public și trece prin stațiile oficiale, în ordine.
+În aplicație, aceste linii au nota „traseu calculat”. `data:verify` verifică:
+- că fiecare stație e la cel mult 60 m de traseu;
+- că traseul nu e mai lung de 1,6 × linia dreaptă dintre stații.
+
+Stațiile cu nume ambiguu (care există în mai multe locuri din oraș) sunt alese după poziția pe drum, între stațiile vecine.
+Corespondențele confirmate manual (de ex. acronime diferite) se trec în `stopAliases` din `overrides.json`.
 
 `data:fetch-transurb` păstrează paginile de orar în `data/raw/transurb-cache/`, ignorat de git. O rulare repetată descarcă doar lista de linii și paginile de traseu (31 de cereri). Cu `-- --refresh`, re-descarcă tot.
 

@@ -17,7 +17,8 @@ export type IssueCode =
   | 'terminal_mismatch'
   | 'unmatched_stops' // stații oficiale fără poziție în OSM
   | 'route_mismatch' // traseul din OSM nu acoperă bine stațiile oficiale
-  | 'no_schedule';
+  | 'no_schedule'
+  | 'routed_geometry'; // traseu calculat pe străzi (OSM nu are relația liniei)
 
 export interface Issue {
   code: IssueCode;
@@ -51,6 +52,8 @@ export interface Variant {
   stopIds: string[];
   /** relația OSM din care vine geometria (poate diferi de sursa stațiilor) */
   geometryRef: string | null;
+  /** 'osm' = relația OSM a liniei; 'routed' = calculat pe rețeaua de străzi prin stațiile oficiale; null = fără desen */
+  geometrySource: 'osm' | 'routed' | null;
   /** câte stații oficiale au fost găsite, în ordine, pe traseul OSM (0..1); null dacă nu e cazul */
   geometryMatch: number | null;
   lengthM: number;

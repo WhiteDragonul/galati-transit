@@ -6,7 +6,9 @@
 // Rulare: npm run data:verify [-- --all] [-- --sample=60] [-- --offline]
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { FeatureCollection } from 'geojson';
+import type { FeatureCollection, LineString, Point } from 'geojson';
+import { distanceM } from './lib/geo.ts';
+import { distanceToLine } from './lib/router.ts';
 import type { LinesFile, ScheduleFile } from '../shared/model.ts';
 import { BASE, parseIndex, parseRoute, parseTimetable } from './lib/transurb-parse.ts';
 import type { TransurbRaw } from './lib/transurb-types.ts';
@@ -88,6 +90,24 @@ async function main() {
     });
   }
   ok.push(`${stopsChecked} stații × tip de zi: orele din aplicație = sursa brută (${timesChecked} ore)`);
+  // trasee calculate pe străzi: fiecare stație lângă traseu, fără ocoluri mari
+  const coordOf = new Map(stops.features.map((f) => [(f.properties as { id: string }).id, (f.geometry as Point).coordinates as [number, number]]));
+  for (const l of lf.lines)
+    for (const v of l.variants) {
+      if (v.geometrySource !== 'routed') continue;
+      const feat = routes.features.find((f) => (f.properties as { variantId: string }).variantId === v.id);
+      if (!feat) { fails.push(`${l.ref} ${v.direction}: traseul calculat lipsește din routes.geojson`); continue; }
+      const line = (feat.geometry as LineString).coordinates as [number, number][];
+      const pts = v.stops.filter((s) => s.stopId).map((s) => ({ name: s.name, c: coordOf.get(s.stopId!)! }));
+      const far = pts.filter((p) => distanceToLine(p.c, line) > 60);
+      let straight = 0;
+      for (let k = 1; k < pts.length; k++) straight += distanceM(pts[k - 1].c, pts[k].c);
+      const ratio = v.lengthM / Math.max(1, straight);
+      check(!far.length && ratio < 1.6,
+        `${l.ref} ${v.direction}: traseu calculat plauzibil (${(v.lengthM / 1000).toFixed(1)} km, ×${ratio.toFixed(2)} față de linia dreaptă, toate stațiile la ≤ 60 m)`,
+        `${l.ref} ${v.direction}: traseu calculat suspect (×${ratio.toFixed(2)}; stații departe: ${far.map((f) => f.name).join(', ') || '—'})`);
+    }
+
   const orphan = routes.features.filter((f) => !variantIds.has((f.properties as { variantId: string }).variantId)).length;
   check(orphan === 0, 'Toate traseele desenate aparțin unei variante', `${orphan} trasee desenate fără variantă`);
 

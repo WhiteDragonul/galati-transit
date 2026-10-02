@@ -1,6 +1,6 @@
 # Raport calitate date — transport public Galați
 
-Generat: 2026-10-02T08:11:48.055Z  
+Generat: 2026-10-02T08:18:12.902Z  
 OSM: `data\raw\osm-2026-10-02.json` (date la 2026-10-02T07:17:35Z)  
 Program oficial Transurb: `data\raw\transurb-2026-10-02.json` (transurbgalati.ro/program_circulatie)  
 Date hartă: © OpenStreetMap contributors (ODbL)
@@ -13,10 +13,10 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 |---|---|
 | Linii | 30 (4 tramvai, 1 troleibuz, 25 autobuz) |
 | Variante (sensuri) | 59 |
-| Stații pe trasee (cu repetări) | 925, dintre care 920 cu poziție pe hartă (99%) |
+| Stații pe trasee (cu repetări) | 925, dintre care 925 cu poziție pe hartă (100%) |
 | Stații distincte pe hartă | 387 |
-| Linii fără probleme „date incomplete” | 27 / 30 |
-| Variante fără desen pe hartă | 2 |
+| Linii fără probleme „date incomplete” | 30 / 30 |
+| Variante fără desen pe hartă | 0 |
 | Variante cu desen OSM diferit de traseul oficial (< 80% stații regăsite) | 0 |
 | Variante cu traseu OSM întrerupt (gol > 5 m) | 0 |
 | Variante fără orar | 0 |
@@ -35,8 +35,8 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 | **44** | Tramvai | retur | 11 | 11 | 100% | [relation/16337534](https://www.openstreetmap.org/relation/16337534) | ✓ | ✓ |
 | **102** | Troleibuz | tur | 18 | 18 | 100% | [relation/7514198](https://www.openstreetmap.org/relation/7514198) | ✓ | ✓ |
 | **102** | Troleibuz | retur | 19 | 19 | 100% | [relation/309380](https://www.openstreetmap.org/relation/309380) | ✓ | ✓ |
-| **1** | Autobuz | tur | 24 | 22 | 0% | — | ✓ | ⚠ no_geometry, unmatched_stops |
-| **2** | Autobuz | tur | 17 | 15 | 0% | — | ✓ | ⚠ no_geometry, unmatched_stops |
+| **1** | Autobuz | tur | 24 | 24 | calculat | traseu calculat pe străzi | ✓ | ✓ |
+| **2** | Autobuz | tur | 17 | 17 | calculat | traseu calculat pe străzi | ✓ | ✓ |
 | **9** | Autobuz | tur | 12 | 12 | 100% | [relation/309379](https://www.openstreetmap.org/relation/309379) | ✓ | ✓ |
 | **9** | Autobuz | retur | 15 | 15 | 100% | [relation/10154626](https://www.openstreetmap.org/relation/10154626) | ✓ | ✓ |
 | **10** | Autobuz | tur | 25 | 25 | 96% | [relation/358092](https://www.openstreetmap.org/relation/358092) | ✓ | ✓ |
@@ -78,7 +78,7 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 | **43** | Autobuz | retur | 2 | 2 | 100% | [relation/21213682](https://www.openstreetmap.org/relation/21213682) | ✓ | ✓ |
 | **50** | Autobuz | tur | 38 | 38 | 100% | [relation/21250647](https://www.openstreetmap.org/relation/21250647) | ✓ | ✓ |
 | **50** | Autobuz | retur | 38 | 38 | 100% | [relation/21244075](https://www.openstreetmap.org/relation/21244075) | ✓ | ✓ |
-| **55** | Autobuz | tur | 26 | 25 | 92% | [relation/21243592](https://www.openstreetmap.org/relation/21243592) | ✓ | ⚠ unmatched_stops |
+| **55** | Autobuz | tur | 26 | 26 | 92% | [relation/21243592](https://www.openstreetmap.org/relation/21243592) | ✓ | ✓ |
 | **55** | Autobuz | retur | 18 | 18 | 100% | [relation/21243593](https://www.openstreetmap.org/relation/21243593) | ✓ | ✓ |
 | **105** | Autobuz | tur | 19 | 19 | 100% | [relation/10177285](https://www.openstreetmap.org/relation/10177285) | ✓ | ✓ |
 | **105** | Autobuz | retur | 22 | 22 | 100% | [relation/10177284](https://www.openstreetmap.org/relation/10177284) | ✓ | ✓ |
@@ -116,10 +116,27 @@ Din `stopAliases` în `data/overrides.json`: numele oficial e păstrat, alias-ul
 - FSEA → F.E.E.A.
 - F.E.A.A. → F.E.E.A.
 
+## Trasee calculate pe străzi
+
+Linii pe care OpenStreetMap nu le are ca relații: traseul e calculat pe rețeaua de străzi OSM (respectând sensurile unice, preferând străzile cu transport public), trecând prin stațiile oficiale poziționate, în ordine. În aplicație sunt marcate „traseu calculat”.
+
+- bus-1 v1:tur: 23 tronsoane, 12.8 km
+- bus-2 v1:tur: 16 tronsoane, 6.3 km
+
+## Stații cu nume ambiguu, alese după poziția pe drum
+
+Linii fără relație OSM: dintre stațiile OSM cu acel nume s-a ales cea aflată între stațiile vecine (ocol minim).
+
+- bus-1: „ROMTELECOM” → „Romtelecom - Bănci” (ocol +90 m)
+- bus-1: „UNIVERSITATE” → „Universitatea „Dunărea de Jos”” (ocol +8 m)
+- bus-2: „LIDL” → „Lidl” (ocol +44 m)
+- bus-2: „OLTULUI” → „Strada Oltului” (ocol +7 m)
+
 ## Stații legate prin poziția pe traseu
 
 Stația oficială e între aceiași vecini ca stația OSM și au un cuvânt semnificativ comun (de ex. tip de stradă diferit).
 
+- bus-55: „POLICULTURA-FLORICULTURA” → „Poligonului-Floricultura”
 - bus-10: „BLD. OTELARILOR” → „Strada Oțelarilor”
 
 ## Stații ale liniilor fără traseu în OSM, poziționate după nume
@@ -175,9 +192,7 @@ Stații oficiale care nu apar pe relația OSM a traseului, dar există în OSM c
 
 Stații oficiale pentru care nu există în OSM o stație cu nume potrivit pe traseu. Se afișează în listă, dar nu pe hartă.
 
-- **1 tur**: ROMTELECOM, UNIVERSITATE
-- **2 tur**: LIDL, OLTULUI
-- **55 tur**: POLICULTURA-FLORICULTURA
+Niciuna.
 
 ## Trasee OSM întrerupte (gol > 5 m)
 

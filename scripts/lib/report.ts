@@ -58,7 +58,7 @@ export async function writeReport(
     for (const v of l.variants) {
       const warn = [...new Set([...l.issues, ...v.issues].filter((i) => i.severity === 'warn').map((i) => i.code))].join(', ');
       md.push(
-        `| **${esc(l.ref)}** | ${MODE[l.mode]} | ${v.direction ?? '?'}${v.label ? ` (${esc(v.label)})` : ''} | ${v.stops.length} | ${v.stops.filter((s) => s.stopId).length} | ${pct(v.geometryMatch)} | ${v.geometryRef ? osmLink(v.geometryRef) : '—'} | ${v.scheduleKey ? '✓' : '—'} | ${warn ? '⚠ ' + warn : '✓'} |`,
+        `| **${esc(l.ref)}** | ${MODE[l.mode]} | ${v.direction ?? '?'}${v.label ? ` (${esc(v.label)})` : ''} | ${v.stops.length} | ${v.stops.filter((s) => s.stopId).length} | ${v.geometrySource === 'routed' ? 'calculat' : pct(v.geometryMatch)} | ${v.geometryRef ? osmLink(v.geometryRef) : v.geometrySource === 'routed' ? 'traseu calculat pe străzi' : '—'} | ${v.scheduleKey ? '✓' : '—'} | ${warn ? '⚠ ' + warn : '✓'} |`,
       );
     }
   md.push('');
@@ -80,6 +80,19 @@ export async function writeReport(
     md.push('Din `stopAliases` în `data/overrides.json`: numele oficial e păstrat, alias-ul e folosit doar la potrivirea cu OSM.', '');
     if (!meta.notes.aliasesUsed.size) md.push('Niciunul.');
     for (const a of meta.notes.aliasesUsed) md.push(`- ${esc(a)}`);
+    md.push('');
+
+    md.push('## Trasee calculate pe străzi', '');
+    md.push('Linii pe care OpenStreetMap nu le are ca relații: traseul e calculat pe rețeaua de străzi OSM (respectând sensurile unice, preferând străzile cu transport public), trecând prin stațiile oficiale poziționate, în ordine. În aplicație sunt marcate „traseu calculat”.', '');
+    if (!meta.notes.routed.length && !meta.notes.routeFailed.length) md.push('Niciunul.');
+    for (const r of meta.notes.routed) md.push(`- ${esc(r.lineId)} ${r.key}: ${r.legs} tronsoane, ${(r.lengthM / 1000).toFixed(1)} km`);
+    for (const r of meta.notes.routeFailed) md.push(`- ⚠ ${esc(r.lineId)} ${r.key}: nu s-a putut calcula (${r.legs}/${r.needed} tronsoane)`);
+    md.push('');
+
+    md.push('## Stații cu nume ambiguu, alese după poziția pe drum', '');
+    md.push('Linii fără relație OSM: dintre stațiile OSM cu acel nume s-a ales cea aflată între stațiile vecine (ocol minim).', '');
+    if (!meta.notes.detourMatches.length) md.push('Niciuna.');
+    for (const n of meta.notes.detourMatches) md.push(`- ${esc(n.lineId)}: „${esc(n.official)}” → „${esc(n.osm)}” (ocol +${n.extraM} m)`);
     md.push('');
 
     md.push('## Stații legate prin poziția pe traseu', '');

@@ -120,6 +120,7 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
       ${warnings.length ? `<div class="notice" role="note"><strong>${WARN_ICON} Date incomplete pe hartă</strong>
         <ul>${warnings.map((m) => `<li>${esc(m.message)}</li>`).join('')}</ul>
         ${geoLink ? `<a href="https://www.openstreetmap.org/${geoLink}" target="_blank" rel="noopener">Traseul în OpenStreetMap ↗</a>` : ''}</div>` : ''}
+      ${variant?.geometrySource === 'routed' ? `<p class="info-note" role="note">Traseu calculat pe străzi, prin stațiile oficiale, în ordine. OpenStreetMap nu are încă această linie; pe porțiuni drumul real poate diferi.</p>` : ''}
       ${data.colourIsFallback(line.id) ? `<p class="note" style="--c:${colour}"><i></i>Culoare de rezervă (lipsește din date)</p>` : ''}
       ${dirGroups.length > 1 ? `<div class="seg" role="tablist" aria-label="Sens">
         <span class="seg-thumb"></span>

@@ -137,6 +137,7 @@ export function fromOsm(raw: OsmRaw, includeNetworks: string[]): SourceResult {
       stops: stopIds.map((id) => ({ name: stops.get(id)!.name ?? '', officialName: null, stopId: id })),
       stopIds,
       geometryRef: `relation/${r.id}`,
+      geometrySource: 'osm',
       geometryMatch: null,
       scheduleKey: null,
       lengthM: Math.round(geom.segments.reduce((s, seg) => s + lineLengthM(seg), 0)),

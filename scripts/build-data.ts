@@ -12,6 +12,7 @@ import { writeReport } from './lib/report.ts';
 import type { StopRecord } from './lib/types.ts';
 import { fromOsm, type OsmRaw } from './sources/osm.ts';
 import { mergeTransurb } from './sources/transurb.ts';
+import { type RoadsRaw, Router } from './lib/router.ts';
 import type { TransurbRaw } from './lib/transurb-types.ts';
 
 const ATTRIBUTION = '© OpenStreetMap contributors (ODbL)';
@@ -47,7 +48,18 @@ async function main() {
 
   const osm = fromOsm(raw, overrides.includeNetworks);
   // cu date oficiale: Transurb dă liniile, stațiile și orarele; OSM doar geometria și pozițiile
-  const merged = tb ? mergeTransurb(osm, tb, overrides.stopAliases) : null;
+  // rețeaua de străzi (opțională): pentru liniile fără relație în OSM
+  const roadsFile = await latestRaw('roads');
+  let router: Router | null = null;
+  if (roadsFile) {
+    const roads: RoadsRaw = JSON.parse(await readFile(roadsFile, 'utf8'));
+    // străzile pe care circulă deja transport public (orice relație de rută din OSM)
+    const transitWays = new Set<number>();
+    for (const el of raw.elements as { type: string; tags?: Record<string, string>; members?: { type: string; ref: number }[] }[])
+      if (el.type === 'relation' && el.tags?.type === 'route') for (const m of el.members ?? []) if (m.type === 'way') transitWays.add(m.ref);
+    router = new Router(roads, transitWays);
+  }
+  const merged = tb ? mergeTransurb(osm, tb, overrides.stopAliases, router) : null;
   const data = merged?.data ?? osm;
   const overrideLog = applyOverrides(data, overrides);
   computeIssues(data);
