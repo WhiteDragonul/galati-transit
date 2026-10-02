@@ -1,4 +1,4 @@
-import { AttributionControl, Map as MlMap, NavigationControl, type Point, type PointLike } from 'maplibre-gl';
+import { Map as MlMap, NavigationControl, type Point, type PointLike } from 'maplibre-gl';
 import './map/worker.ts';
 import { loadData } from './data.ts';
 import { addLayers, LAYER, setDimmed } from './map/layers.ts';
@@ -30,15 +30,11 @@ async function main() {
   });
   if (import.meta.env.DEV) Object.assign(window, { __map: map });
   map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
-  map.addControl(
-    new AttributionControl({
-      compact: false,
-      customAttribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (ODbL)',
-    }),
-    'bottom-right',
-  );
+  // atribuirea obligatorie (ODbL pentru date, CC-BY pentru schema OpenMapTiles) e un element propriu de un rând
+  // (index.html, #attribution): controlul MapLibre ar repeta atribuirea lungă din TileJSON
 
-  const sheet = initSheet(() => {});
+  // înălțimea vizibilă a sheet-ului: atribuirea stă mereu chiar deasupra lui
+  const sheet = initSheet((px) => document.documentElement.style.setProperty('--sheet-visible', `${Math.round(px)}px`));
   const padding = (): Padding => {
     if (sheet.isMobile()) return { top: 70, right: 30, bottom: Math.round(window.innerHeight * 0.52) + 20, left: 30 };
     const panel = $('#panel').getBoundingClientRect();

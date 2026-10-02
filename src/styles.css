@@ -207,7 +207,10 @@ button { font: inherit; color: inherit; }
 /* ——— controale hartă ——— */
 .maplibregl-ctrl-group { border-radius: 12px !important; box-shadow: var(--shadow) !important; overflow: hidden; }
 .maplibregl-ctrl-group button { width: 40px !important; height: 40px !important; }
-.maplibregl-ctrl-attrib { font-size: 11px; border-radius: 8px 0 0 0; background: rgba(255, 255, 255, 0.85) !important; }
+/* atribuire: un singur rând mic, fără fundal */
+.attribution { position: fixed; right: 8px; bottom: 6px; z-index: 5; margin: 0; font-size: 10.5px; line-height: 1.3; color: var(--ink-2); white-space: nowrap; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff; pointer-events: none; }
+.attribution a { color: inherit; text-decoration: none; pointer-events: auto; }
+.attribution a:hover { text-decoration: underline; }
 
 /* ——— mobil: panoul devine bottom sheet ——— */
 @media (max-width: 767px) {
@@ -253,7 +256,8 @@ button { font: inherit; color: inherit; }
   .tt-grid td { gap: 4px 10px; }
   .notice, .note { font-size: 12px; }
   .maplibregl-popup.stop-popup .maplibregl-popup-content { max-width: calc(100vw - 32px); }
-  .maplibregl-ctrl-bottom-right { bottom: calc(var(--sheet-peek) + 6px); }
+  /* atribuirea: un rând de 9.5 px chiar deasupra sheet-ului în poziția minimă */
+  .attribution { bottom: calc(var(--sheet-visible, var(--sheet-peek)) + 3px); right: 6px; font-size: 9.5px; z-index: 11; transition: bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
   .maplibregl-ctrl-top-right { top: env(safe-area-inset-top); }
 }
 
