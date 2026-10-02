@@ -10,16 +10,19 @@
     "data:fetch": "tsx scripts/fetch-osm.ts",
     "data:build": "tsx scripts/build-data.ts",
     "data": "npm run data:fetch && npm run data:build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "snapshot": "tsx scripts/snapshot.ts"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
     "@types/node": "^26.6.4",
+    "playwright-core": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.2"
   },
   "dependencies": {
-    "maplibre-gl": "^6.11.2"
+    "maplibre-gl": "^6.11.2",
+    "motion": "^13.5.0"
   }
 }

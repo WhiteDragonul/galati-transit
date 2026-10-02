@@ -3,10 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f3ef" />
+    <meta name="description" content="Hartă 3D interactivă a liniilor de transport public din Galați" />
     <title>Galați Transit Atlas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="map"></div>
+    <a class="skip" href="#line-list">Sari la lista de linii</a>
+    <div id="map" role="application" aria-label="Harta liniilor de transport public"></div>
+
+    <aside id="panel" aria-label="Linii de transport">
+      <div class="sheet-handle" aria-hidden="true"><span></span></div>
+      <header class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M6 22c3-8 8-12 20-12" /><path d="M6 12c6 0 10 4 20 10" /><circle cx="6" cy="22" r="2.6" /><circle cx="26" cy="10" r="2.6" /><circle cx="6" cy="12" r="2.6" /><circle cx="26" cy="22" r="2.6" /></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Galați</h1>
+          <p>Atlasul transportului public</p>
+        </div>
+        <dl class="brand-stats">
+          <div><dt>linii</dt><dd id="stat-lines">–</dd></div>
+          <div><dt>stații</dt><dd id="stat-stops">–</dd></div>
+        </dl>
+      </header>
+
+      <div class="views">
+        <section class="view view-list" id="view-list">
+          <label class="search">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+            <span class="sr-only">Caută linie după număr sau capăt</span>
+            <input id="search" type="search" inputmode="search" autocomplete="off" placeholder="Caută linia (ex. 102, Micro 19)" />
+          </label>
+          <div class="chips" role="radiogroup" aria-label="Tip de transport" id="mode-chips"></div>
+          <div class="list" id="line-list" tabindex="-1"></div>
+        </section>
+        <section class="view view-detail" id="view-detail" hidden></section>
+      </div>
+    </aside>
+
+    <div id="loading" class="loading" role="status">
+      <div class="loading-rail"><span></span></div>
+      <p>Se încarcă rețeaua…</p>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
