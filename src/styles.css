@@ -22,7 +22,8 @@
   -webkit-font-smoothing: antialiased;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
 html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
 button { font: inherit; color: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -120,7 +121,8 @@ button { font: inherit; color: inherit; }
 
 .seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: 0 14px; padding: 4px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
 .seg-thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; border-radius: 9px; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
-.seg button { position: relative; z-index: 1; min-height: 44px; border: 0; background: transparent; cursor: pointer; border-radius: 9px; padding: 4px 8px; line-height: 1.2; }
+.seg button { position: relative; z-index: 1; min-width: 0; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 0; background: transparent; cursor: pointer; border-radius: 9px; padding: 4px 8px; line-height: 1.2; }
+.seg button span { max-width: 100%; }
 .seg button b { display: block; font-size: 13px; font-weight: 700; }
 .seg button span { display: block; font-size: 11.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .seg button[aria-selected='false'] b { color: var(--ink-2); }
@@ -147,6 +149,9 @@ button { font: inherit; color: inherit; }
 .stop .tag.nopos { color: var(--warn-ink); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 999px; padding: 1px 6px; text-transform: none; letter-spacing: 0; }
 .stop.unplaced .dot::after { border-style: dashed; }
 .stop button[aria-expanded='true'] { background: var(--surface-2); }
+/* focus vizibil doar la tastatură, desenat în interior ca să nu iasă din rând */
+.stop button:focus-visible, .row:focus-visible { outline-offset: -2px; }
+.stop button:focus:not(:focus-visible), .row:focus:not(:focus-visible) { outline: none; }
 .pill { font-size: 10.5px; font-weight: 600; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
 .source { margin: 0; padding: 4px 18px 18px; font-size: 11.5px; color: var(--ink-3); }
 .source a { color: var(--ink-2); }
@@ -154,10 +159,11 @@ button { font: inherit; color: inherit; }
 /* ——— orar (sub stație) ——— */
 .tt { flex-basis: 100%; margin: 2px 0 10px 34px; padding: 10px 12px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
 .tt[hidden] { display: none; }
-.tt-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
-.tt-tabs button { flex: 1; min-height: 36px; border: 1px solid var(--line); background: var(--surface); border-radius: 9px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.tt-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px; }
+.tt-tabs button { min-width: 0; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.1; color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: background 0.16s, color 0.16s, border-color 0.16s; }
+.tt-tabs button > span { overflow: hidden; text-overflow: ellipsis; }
 .tt-tabs button[aria-selected='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
-.tt-tabs small { font-weight: 500; opacity: 0.75; }
+.tt-tabs .today { flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 5px; border-radius: 5px; background: rgba(127, 127, 127, 0.18); }
 .tt-next { margin: 0 0 8px; font-size: 13px; }
 .tt-next b { font-variant-numeric: tabular-nums; }
 .tt-msg { margin: 4px 0; font-size: 12.5px; color: var(--ink-2); }
@@ -214,12 +220,39 @@ button { font: inherit; color: inherit; }
     touch-action: none;
     will-change: transform;
   }
-  .sheet-handle { display: grid; place-items: center; height: 22px; cursor: grab; flex: none; }
+  /* sub panou: aceeași culoare, ca la orice tragere peste limită să nu apară harta dedesubt */
+  #panel::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 40px; background: inherit; }
+  #panel { overflow: visible; }
+  .views { overflow: hidden; border-radius: 0; }
+  .sheet-handle { display: grid; place-items: center; height: 24px; cursor: grab; flex: none; touch-action: none; }
   .sheet-handle span { width: 40px; height: 5px; border-radius: 3px; background: #d4d2cc; }
-  .brand { padding: 2px 16px 10px; }
+  .brand { padding: 0 16px 10px; touch-action: none; }
   .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
   .brand h1 { font-size: 18px; }
-  .list, .stops { touch-action: pan-y; }
+  /* în detaliu antetul „Galați” dispare: tot spațiul rămâne pentru linie și stații */
+  #panel.is-detail .brand { display: none; }
+  /* antetul liniei (cu „înapoi”) și selectorul de sens rămân fixe la derulare */
+  .detail-head { position: sticky; top: 0; z-index: 3; height: 64px; padding: 0 14px 8px; background: var(--surface); touch-action: none; }
+  .detail-title h2 { font-size: 17px; }
+  .detail-title p { font-size: 12.5px; }
+
+  /* un singur scroll pe telefon: tot detaliul (avertisment, sens, stații) derulează împreună */
+  .view-detail { overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding-bottom: calc(var(--sheet-hidden, 0px) + env(safe-area-inset-bottom) + 16px); }
+  .view-detail .stops { flex: none; overflow: visible; }
+  .list { touch-action: pan-y; padding-bottom: calc(var(--sheet-hidden, 0px) + env(safe-area-inset-bottom) + 16px); }
+  .seg { position: sticky; top: 64px; z-index: 2; box-shadow: 0 8px 12px -8px rgba(0, 0, 0, 0.12); }
+  .seg::before { content: ''; position: absolute; left: -14px; right: -14px; top: -6px; height: 6px; background: var(--surface); }
+
+  /* ținte de atingere ≥ 44 px */
+  .stop, .stop button { min-height: 46px; }
+  .stop .name { font-size: 15px; }
+  .row { min-height: 60px; }
+  .chip { height: 36px; padding: 0 14px; }
+  .tt { margin-left: 30px; padding: 10px 10px 8px; }
+  .tt-grid { font-size: 14px; }
+  .tt-grid td { gap: 4px 10px; }
+  .notice, .note { font-size: 12px; }
+  .maplibregl-popup.stop-popup .maplibregl-popup-content { max-width: calc(100vw - 32px); }
   .maplibregl-ctrl-bottom-right { bottom: calc(var(--sheet-peek) + 6px); }
   .maplibregl-ctrl-top-right { top: env(safe-area-inset-top); }
 }

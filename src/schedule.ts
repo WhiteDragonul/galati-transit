@@ -48,4 +48,4 @@ export function byHour(times: string[]) {
   return [...m];
 }
 
-export const shortDayLabel = (s: string) => (isWeekendLabel(s) ? 'Weekend și sărbători' : isWeekdayLabel(s) ? 'Luni – vineri' : s);
+export const shortDayLabel = (s: string) => (isWeekendLabel(s) ? 'Weekend' : isWeekdayLabel(s) ? 'Luni–vineri' : s);

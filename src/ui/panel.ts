@@ -212,7 +212,7 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
         .join('')}</td></tr>`)
       .join('');
     box.innerHTML = `
-      <div class="tt-tabs" role="tablist">${dayTypes.map((d, i) => `<button role="tab" aria-selected="${i === k}" data-day="${i}">${esc(shortDayLabel(d))}${i === today ? ' <small>azi</small>' : ''}</button>`).join('')}</div>
+      <div class="tt-tabs" role="tablist">${dayTypes.map((d, i) => `<button role="tab" aria-selected="${i === k}" data-day="${i}"><span>${esc(shortDayLabel(d))}</span>${i === today ? '<small class="today">azi</small>' : ''}</button>`).join('')}</div>
       ${k === today ? `<p class="tt-next">${next ? `Următoarea plecare: <b>${next}</b> · ${inMinutes(next, now)}` : 'Nu mai sunt plecări azi.'}</p>` : ''}
       ${times.length ? `<table class="tt-grid" style="--c:${data.colourOf(line.id)}"><tbody>${rows}</tbody></table>` : '<p class="tt-msg">Fără plecări în acest tip de zi.</p>'}
       <p class="tt-foot">Programul de weekend se aplică și în sărbătorile legale. <a href="${esc(entry.url)}" target="_blank" rel="noopener">Orarul oficial ↗</a></p>`;
@@ -230,41 +230,54 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
     if (!seg) return;
     const thumb = $('.seg-thumb', seg);
     const tabs = [...seg.querySelectorAll<HTMLButtonElement>('button')];
-    const idx = Math.max(0, tabs.findIndex((b) => b.getAttribute('aria-selected') === 'true'));
-    const w = (seg.clientWidth - 8) / tabs.length;
-    thumb.style.width = `${w}px`;
-    const x = `translateX(${idx * w}px)`;
+    const active = tabs.find((b) => b.getAttribute('aria-selected') === 'true') ?? tabs[0];
+    if (!active || !active.offsetWidth) return;
+    thumb.style.width = `${active.offsetWidth}px`;
+    // offsetLeft ignoră transform-ul, deci diferența e mereu poziția corectă a tab-ului activ
+    const x = `translateX(${active.offsetLeft - thumb.offsetLeft}px)`;
     if (animated && !reducedMotion()) animate(thumb, { transform: x }, SPRING);
     else thumb.style.transform = x;
   }
+  // lățimea panoului se schimbă (rotire telefon, redimensionare): indicatorul se repoziționează
+  new ResizeObserver(() => placeThumb(false)).observe(detailView);
 
   function animateStops() {
     if (reducedMotion()) return;
     const items = [...detailView.querySelectorAll('.stop')].slice(0, 18);
-    animate(items, { opacity: [0, 1], transform: ['translateX(-6px)', 'translateX(0)'] }, { duration: DUR.base, delay: stagger(0.03, { startDelay: 0.12 }), ease: EASE_OUT });
+    animate(items, { opacity: [0, 1], transform: ['translateY(6px)', 'none'] }, { duration: DUR.base, delay: stagger(0.03, { startDelay: 0.12 }), ease: EASE_OUT });
   }
 
   // ——— tranziții între vederi ———
+  const isMobile = () => matchMedia('(max-width: 767px)').matches;
+  // desktop: glisare laterală (listă ← → detaliu); telefon: doar opacitate + 8 px vertical
+  const shift = (dir: 1 | -1, px: number) => (isMobile() ? `translateY(${dir * 8}px)` : `translateX(${dir * px}px)`);
+  const panelEl = $('#panel');
+
   async function showDetail(line: Line, variantId: string | null, fromList: boolean) {
     if (fromList && !reducedMotion()) {
-      await animate(listView, { opacity: [1, 0], transform: ['translateX(0)', 'translateX(-16px)'] }, { duration: DUR.fast, ease: EASE_IN }).finished;
+      await animate(listView, { opacity: [1, 0], transform: ['none', shift(-1, 16)] }, { duration: DUR.fast, ease: EASE_IN }).finished;
     }
     listView.hidden = true;
     detailView.hidden = false;
+    panelEl.classList.add('is-detail');
     renderDetail(line, variantId);
-    if (!reducedMotion()) animate(detailView, { opacity: [0, 1], transform: ['translateX(20px)', 'translateX(0)'] }, { duration: DUR.base, ease: EASE_OUT });
+    detailView.scrollTop = 0;
+    if (!reducedMotion()) animate(detailView, { opacity: [0, 1], transform: [shift(1, 20), 'none'] }, { duration: DUR.base, ease: EASE_OUT });
     animateStops();
-    ($('.back', detailView) as HTMLButtonElement).focus({ preventScroll: true });
+    // focus mutat doar pentru tastatură/desktop; pe telefon ar afișa un contur fără rost
+    if (!isMobile()) ($('.back', detailView) as HTMLButtonElement).focus({ preventScroll: true });
   }
 
   async function showList() {
-    if (!reducedMotion()) await animate(detailView, { opacity: [1, 0], transform: ['translateX(0)', 'translateX(20px)'] }, { duration: DUR.fast, ease: EASE_IN }).finished;
+    if (!reducedMotion()) await animate(detailView, { opacity: [1, 0], transform: ['none', shift(1, 20)] }, { duration: DUR.fast, ease: EASE_IN }).finished;
     detailView.hidden = true;
     listView.hidden = false;
+    panelEl.classList.remove('is-detail');
     listView.style.opacity = '1';
-    if (!reducedMotion()) animate(listView, { opacity: [0, 1], transform: ['translateX(-16px)', 'translateX(0)'] }, { duration: DUR.base, ease: EASE_OUT });
+    if (!reducedMotion()) animate(listView, { opacity: [0, 1], transform: [shift(-1, 16), 'none'] }, { duration: DUR.base, ease: EASE_OUT });
     const row = list.querySelector<HTMLButtonElement>(`[data-line="${CSS.escape(lastLine ?? '')}"]`);
-    row?.focus({ preventScroll: false });
+    if (!isMobile()) row?.focus({ preventScroll: false });
+    else row?.scrollIntoView({ block: 'nearest' });
   }
 
   let lastLine: string | null = null;
@@ -282,10 +295,11 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
       const seg = detailView.querySelector('.seg');
       const prevIdx = seg ? [...seg.querySelectorAll('button')].findIndex((b) => b.getAttribute('aria-selected') === 'true') : 0;
       renderDetail(data.lineById.get(s.lineId)!, s.variantId);
-      const thumb = detailView.querySelector<HTMLElement>('.seg-thumb');
-      if (thumb) {
-        const w = parseFloat(thumb.style.width);
-        thumb.style.transform = `translateX(${prevIdx * w}px)`;
+      const seg2 = detailView.querySelector<HTMLElement>('.seg');
+      const thumb = seg2?.querySelector<HTMLElement>('.seg-thumb');
+      const prevBtn = seg2?.querySelectorAll<HTMLButtonElement>('button')[Math.max(0, prevIdx)];
+      if (thumb && prevBtn) {
+        thumb.style.transform = `translateX(${prevBtn.offsetLeft - thumb.offsetLeft}px)`;
         placeThumb(true);
       }
       animateStops();

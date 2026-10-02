@@ -1,7 +1,7 @@
 // Pe telefon panoul e un bottom sheet cu trei poziții (peek / jumătate / plin),
 // tras cu degetul și eliberat cu fizică de resort.
 import { animate } from 'motion';
-import { reducedMotion, SPRING } from '../motion/tokens.ts';
+import { reducedMotion, SHEET_SPRING } from '../motion/tokens.ts';
 import { $ } from './dom.ts';
 
 export type Snap = 'peek' | 'half' | 'full';
@@ -25,13 +25,20 @@ export function initSheet(onChange: (visiblePx: number) => void) {
     panel.style.transform = `translateY(${v}px)`;
   };
 
+  /** partea de jos a panoului rămasă sub ecran: conținutul derulabil primește atâta spațiu în plus,
+   *  ca ultimele elemente să poată ajunge în zona vizibilă și la jumătate */
+  const setHidden = (px: number) => panel.style.setProperty('--sheet-hidden', `${Math.max(0, Math.round(px))}px`);
+
+  let anim: { stop: () => void } | null = null;
   function snapTo(s: Snap, velocity = 0) {
     if (!mq.matches) return;
     snap = s;
     const target = yFor(s);
+    anim?.stop(); // un singur resort activ: altfel două animații se luptă pe aceeași poziție
+    setHidden(target);
     if (reducedMotion()) apply(target);
-    else
-      animate(y, target, { ...SPRING, velocity, onUpdate: apply });
+    // fără depășire în sus: panoul nu se desprinde niciodată de marginea de jos a ecranului
+    else anim = animate(y, target, { ...SHEET_SPRING, velocity, onUpdate: (v) => apply(Math.max(0, v)) });
     onChange(height() - target);
   }
 
@@ -44,6 +51,7 @@ export function initSheet(onChange: (visiblePx: number) => void) {
     if (!grabZones().some((z) => z.contains(e.target as Node))) return;
     if ((e.target as HTMLElement).closest('button, input')) return;
     dragging = true;
+    anim?.stop();
     startY = lastY = e.clientY;
     startT = lastT = performance.now();
     panel.setPointerCapture(e.pointerId);
@@ -51,8 +59,9 @@ export function initSheet(onChange: (visiblePx: number) => void) {
   panel.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     const base = yFor(snap);
+    // peste limita de sus: rezistență, dar maxim 24 px, ca panoul să nu se desprindă de jos
     let next = base + (e.clientY - startY);
-    if (next < 0) next = next * 0.25; // rezistență peste limită
+    if (next < 0) next = Math.max(-24, next * 0.2);
     apply(next);
     lastY = e.clientY;
     lastT = performance.now();
