@@ -63,13 +63,16 @@ export function showSelection(map: MlMap, data: AppData, lineId: string | null, 
   const features = data.routes.features.filter((f) => f.properties.variantId === variant?.id);
   selSrc.setData({ type: 'FeatureCollection', features } as never);
 
-  const stopFeatures: Feature<Point>[] = (variant?.stopIds ?? []).map((id, i, arr) => {
-    const s = data.stopById.get(id)!;
-    return {
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: s.coord },
-      properties: { id, name: s.name, groupId: s.groupId, colour, terminal: i === 0 || i === arr.length - 1 },
-    };
+  // doar stațiile cu poziție; capetele de linie sunt cele oficiale (prima/ultima din listă)
+  const all = variant?.stops ?? [];
+  const stopFeatures: Feature<Point>[] = all.flatMap((st, i) => {
+    const s = st.stopId ? data.stopById.get(st.stopId) : undefined;
+    if (!s) return [];
+    return [{
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: s.coord },
+      properties: { id: s.id, name: st.name, groupId: s.groupId, colour, terminal: i === 0 || i === all.length - 1 },
+    }];
   });
   stopSrc.setData({ type: 'FeatureCollection', features: [] } as never);
   setDimmed(map, true);

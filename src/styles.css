@@ -143,7 +143,42 @@ button { font: inherit; color: inherit; }
 .stop .others i { width: 7px; height: 7px; border-radius: 50%; background: var(--c2); }
 .stop .unnamed { color: var(--warn-ink); font-style: italic; }
 
+.stop { flex-wrap: wrap; }
+.stop .tag.nopos { color: var(--warn-ink); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 999px; padding: 1px 6px; text-transform: none; letter-spacing: 0; }
+.stop.unplaced .dot::after { border-style: dashed; }
+.stop button[aria-expanded='true'] { background: var(--surface-2); }
+.pill { font-size: 10.5px; font-weight: 600; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
+.source { margin: 0; padding: 4px 18px 18px; font-size: 11.5px; color: var(--ink-3); }
+.source a { color: var(--ink-2); }
+
+/* ——— orar (sub stație) ——— */
+.tt { flex-basis: 100%; margin: 2px 0 10px 34px; padding: 10px 12px 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.tt[hidden] { display: none; }
+.tt-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.tt-tabs button { flex: 1; min-height: 36px; border: 1px solid var(--line); background: var(--surface); border-radius: 9px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.tt-tabs button[aria-selected='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tt-tabs small { font-weight: 500; opacity: 0.75; }
+.tt-next { margin: 0 0 8px; font-size: 13px; }
+.tt-next b { font-variant-numeric: tabular-nums; }
+.tt-msg { margin: 4px 0; font-size: 12.5px; color: var(--ink-2); }
+.tt-grid { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
+.tt-grid th { width: 30px; padding: 3px 8px 3px 0; text-align: right; font-weight: 700; color: var(--ink); vertical-align: top; border-right: 2px solid var(--c); }
+.tt-grid td { padding: 3px 0 3px 8px; display: flex; flex-wrap: wrap; gap: 2px 8px; }
+.tt-grid tr + tr th, .tt-grid tr + tr td { border-top: 1px solid var(--line); }
+.tt-grid span.past { color: var(--ink-3); }
+.tt-grid span.next { background: var(--c); color: #fff; border-radius: 5px; padding: 0 4px; margin: 0 -4px; font-weight: 700; }
+.tt-foot { margin: 8px 0 0; font-size: 11px; color: var(--ink-3); }
+.tt-foot a { color: var(--ink-2); }
+
 /* ——— popup stație ——— */
+.stop-popup .deps { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.stop-popup .deps-h { margin: 0 0 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+.stop-popup .deps ul { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow-y: auto; }
+.stop-popup .deps li button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 4px 2px; border: 0; background: none; cursor: pointer; border-radius: 8px; text-align: left; font: inherit; }
+.stop-popup .deps li button:hover { background: var(--surface-2); }
+.stop-popup .deps .to { flex: 1; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stop-popup .deps .when { font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stop-popup .deps .when small { color: var(--ink-3); font-size: 11px; }
 .maplibregl-popup.stop-popup .maplibregl-popup-content { padding: 14px 14px 12px; border-radius: 14px; box-shadow: var(--shadow); font-family: inherit; min-width: 200px; max-width: 280px; transform-origin: 50% 100%; animation: pop 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
 .maplibregl-popup.stop-popup .maplibregl-popup-close-button { width: 32px; height: 32px; font-size: 20px; color: var(--ink-3); border-radius: 8px; }
 .stop-popup h3 { margin: 0 28px 2px 0; font-size: 15px; font-weight: 700; }

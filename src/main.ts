@@ -48,9 +48,11 @@ async function main() {
   const panel = initPanel(data, {
     onStopClick(stopId) {
       const s = data.stopById.get(stopId)!;
-      if (sheet.isMobile()) sheet.snapTo('peek');
-      map.easeTo({ center: s.coord, zoom: Math.max(map.getZoom(), 15.5), duration: ms(900), easing: easeInOutCubic, padding: sheet.isMobile() ? { top: 0, left: 0, right: 0, bottom: 168 } : padding() });
-      openStopPopup(map, data, stopId);
+      // pe telefon sheet-ul rămâne la jumătate (acolo se deschide orarul), iar harta centrează stația deasupra lui
+      if (sheet.isMobile() && sheet.snap !== 'half') sheet.snapTo('half');
+      map.easeTo({ center: s.coord, zoom: Math.max(map.getZoom(), 15.5), duration: ms(900), easing: easeInOutCubic, padding: padding() });
+      // pe telefon orarul din sheet ține deja locul popup-ului
+      if (!sheet.isMobile()) openStopPopup(map, data, stopId);
     },
   });
 
