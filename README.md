@@ -47,19 +47,42 @@ npm run snapshot              # în altul: capturi desktop + telefon în snapsho
 
 ## Date
 
+Sunt două surse, fiecare folosită pentru ce are mai bun:
+
+| Sursă | Ce dă |
+|---|---|
+| **transurbgalati.ro** (programul de circulație) | lista oficială de linii, stațiile în ordine pe tur/retur, variantele de serviciu (ex. weekend spre Grădina Publică) și **orarul fiecărei stații** (luni–vineri / weekend și sărbători) |
+| **OpenStreetMap** (Overpass) | desenul traseelor și pozițiile stațiilor pe hartă |
+
+Stațiile oficiale sunt legate de stațiile OSM prin potrivirea numelor, în ordine (`scripts/lib/match.ts`, cu teste).
+O stație fără corespondent sigur rămâne **fără poziție** și apare marcată în aplicație și în raport. Nu e plasată aproximativ.
+
 ```powershell
-npm run data:fetch   # Overpass → data/raw/osm-YYYY-MM-DD.json (cu fallback pe mirror-uri)
-npm run data:build   # cel mai recent raw + data/overrides.json → public/data/* + data/report.md
-npm run data         # ambele
+npm run data:fetch            # OSM → data/raw/osm-YYYY-MM-DD.json
+npm run data:fetch-transurb   # site Transurb → data/raw/transurb-YYYY-MM-DD.json (~960 pagini, 3 cereri simultan, cu cache)
+npm run data:build            # → public/data/* (+ schedules/<linie>.json) și data/report.md
+npm run data:verify           # verificări + comparație cu site-ul live → data/verify.md
+npm run data                  # toate patru
+npm test                      # teste pentru potrivirea numelor de stații
 ```
 
-`data:build` nu accesează rețeaua. După ce editezi `overrides.json`, rulează doar `data:build`.
+`data:fetch-transurb` păstrează paginile de orar în `data/raw/transurb-cache/`, ignorat de git. O rulare repetată descarcă doar lista de linii și paginile de traseu (31 de cereri). Cu `-- --refresh`, re-descarcă tot.
+
+`data:verify` verifică:
+- liniile, stațiile și orele din aplicație față de sursa brută (toate);
+- lista de linii și stațiile fiecărei linii față de site-ul live (toate);
+- orarele față de site-ul live, pe un eșantion de stații.
+
+Opțiuni: `-- --all` verifică orarele tuturor stațiilor live, `-- --sample=N` alege mărimea eșantionului, `-- --offline` sare peste comparația live. Codul de ieșire e diferit de 0 dacă ceva nu corespunde.
+
+Orarul de weekend se aplică și în sărbătorile legale, conform site-ului. Aplicația nu cunoaște calendarul sărbătorilor, deci în acele zile arată orarul de luni–vineri.
 
 ### Fluxul datelor
 
 ```
-sursă (scripts/sources/osm.ts; ulterior gtfs.ts)
-  → model intern (shared/model.ts)
+OSM (scripts/sources/osm.ts) ──┐
+                               ├→ model intern (shared/model.ts)
+Transurb (scripts/sources/transurb.ts) ┘   ← Transurb dă liniile/stațiile/orarele, OSM geometria
   → data/overrides.json
   → verificări de calitate (scripts/lib/quality.ts)
   → public/data/lines.json, routes.geojson, stops.geojson + data/report.md

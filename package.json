@@ -9,9 +9,12 @@
     "preview": "vite preview",
     "data:fetch": "tsx scripts/fetch-osm.ts",
     "data:build": "tsx scripts/build-data.ts",
-    "data": "npm run data:fetch && npm run data:build",
+    "data": "npm run data:fetch && npm run data:fetch-transurb && npm run data:build && npm run data:verify",
     "typecheck": "tsc --noEmit",
-    "snapshot": "tsx scripts/snapshot.ts"
+    "snapshot": "tsx scripts/snapshot.ts",
+    "data:fetch-transurb": "tsx scripts/fetch-transurb.ts",
+    "data:verify": "tsx scripts/verify-data.ts",
+    "test": "tsx --test scripts/lib/match.test.ts"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
