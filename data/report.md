@@ -1,6 +1,6 @@
 # Raport calitate date — transport public Galați
 
-Generat: 2026-10-02T07:22:08.589Z  
+Generat: 2026-10-02T07:26:31.588Z  
 Sursă: `data\raw\osm-2026-10-02.json` (OSM la 2026-10-02T07:17:35Z)  
 Date: © OpenStreetMap contributors (ODbL)
 
@@ -9,12 +9,12 @@ Date: © OpenStreetMap contributors (ODbL)
 | | |
 |---|---|
 | Linii | 40 (7 tramvai, 1 troleibuz, 32 autobuz) |
-| Variante (sensuri) | 81 |
+| Variante (sensuri) | 79 |
 | Stații (platforme) | 392 |
-| Linii fără probleme de tip „date incomplete” | 30 / 40 |
-| Variante cu traseu întrerupt (gol > 5 m) | 9 |
+| Linii fără probleme de tip „date incomplete” | 32 / 40 |
+| Variante cu traseu întrerupt (gol > 5 m) | 7 |
 | Variante fără geometrie | 0 |
-| Variante fără stații | 6 |
+| Variante fără stații | 5 |
 | Stații fără nume | 0 |
 | Stații cu nume preluat de la stop_position | 0 |
 | Linii fără ambele sensuri | 7 |
@@ -45,13 +45,13 @@ Date: © OpenStreetMap contributors (ODbL)
 | **19** | Autobuz | tur, retur | 16 / 20 | 6.9 / 7.6 | ✓ |
 | **20** | Autobuz | tur, retur | 14 / 16 | 7.5 / 7.9 | ✓ |
 | **22** | Autobuz | tur | 18 | 8.4 | ⚠ missing_return |
-| **23** | Autobuz | tur, retur, ? | 14 / 16 / 1 | 7.9 / 9.1 / 13.4 | ⚠ geometry_gaps |
+| **23** | Autobuz | tur, retur | 14 / 16 | 7.9 / 9.1 | ✓ |
 | **24** | Autobuz | tur, retur | 26 / 25 | 11.4 / 11.1 | ✓ |
 | **25** | Autobuz | tur, retur | 11 / 12 | 6.0 / 6.8 | ✓ |
 | **26** | Autobuz | tur, retur | 15 / 17 | 6.7 / 7.4 | ✓ |
 | **28** | Autobuz | tur, retur | 25 / 25 | 10.2 / 9.4 | ✓ |
 | **30** | Autobuz | tur, retur | 5 / 5 | 3.4 / 3.4 | ✓ |
-| **31** | Autobuz | tur, retur, ? | 6 / 6 / 0 | 3.2 / 3.3 / 5.6 | ⚠ geometry_gaps, no_stops |
+| **31** | Autobuz | tur, retur | 6 / 6 | 3.2 / 3.3 | ✓ |
 | **32** | Autobuz | tur, retur | 7 / 6 | 3.9 / 4.2 | ✓ |
 | **33** | Autobuz | tur, retur | 6 / 4 | 2.6 / 1.8 | ✓ |
 | **34** | Autobuz | tur, retur | 21 / 17 | 10.2 / 8.3 | ✓ |
@@ -77,8 +77,6 @@ Date: © OpenStreetMap contributors (ODbL)
 | 8 | — | 10 | 772 | [relation/358091](https://www.openstreetmap.org/relation/358091) |
 | 17 | Autobuz 17: Dimitrie Cantemir => Metro | 7 | 168 | [relation/10240955](https://www.openstreetmap.org/relation/10240955) |
 | 17 | Autobuz 17: Metro => Dimitrie Cantemir | 5 | 28 | [relation/10241467](https://www.openstreetmap.org/relation/10241467) |
-| 23 | — | 32 | 1914 | [relation/395899](https://www.openstreetmap.org/relation/395899) |
-| 31 | — | 14 | 1297 | [relation/396132](https://www.openstreetmap.org/relation/396132) |
 
 ## Variante fără geometrie sau fără stații
 
@@ -87,7 +85,6 @@ Date: © OpenStreetMap contributors (ODbL)
 - 40 — —: Varianta nu are stații — [relation/358086](https://www.openstreetmap.org/relation/358086)
 - 43 — —: Varianta nu are stații — [relation/399971](https://www.openstreetmap.org/relation/399971)
 - 8 — —: Varianta nu are stații — [relation/358091](https://www.openstreetmap.org/relation/358091)
-- 31 — —: Varianta nu are stații — [relation/396132](https://www.openstreetmap.org/relation/396132)
 
 ## Sensuri lipsă sau neidentificate
 
@@ -143,4 +140,5 @@ Se pot include adăugând rețeaua/operatorul în `includeNetworks` din `data/ov
 
 ## Override-uri aplicate
 
-Niciunul.
+- varianta osm:r395899 ascunsă
+- varianta osm:r396132 ascunsă
