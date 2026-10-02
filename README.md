@@ -14,6 +14,37 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
+## Interfață
+
+- **Hartă**: MapLibre GL JS, stil OpenFreeMap Positron, clădiri 3D (`fill-extrusion`) de la zoom 12.
+- **Panou**: pe desktop e în stânga; pe telefon (sub 768 px) devine un bottom sheet cu trei poziții, tras cu degetul.
+- **Link direct** către o linie: `/#linie=bus-9` (id-urile sunt în `public/data/lines.json`).
+- **Linii cu date incomplete**: traseu punctat pe hartă, eticheta „incomplet” în listă și un bloc explicativ în detaliu, cu link spre relația OSM.
+- **Culori**: OSM nu are culori pentru liniile din Galați, deci UI-ul folosește o paletă de rezervă, marcată ca atare. Culorile oficiale se pun în `overrides.json`.
+
+### Motion design
+
+Toate duratele și curbele sunt centralizate în `src/motion/tokens.ts`, iar animațiile DOM folosesc biblioteca [`motion`](https://motion.dev).
+
+| Moment | Ce se întâmplă |
+|---|---|
+| Intro | camera coboară din vederea de sus într-o vedere înclinată (52°); liniile apar treptat, panoul intră, rândurile listei apar pe rând |
+| Selecție linie | celelalte linii se estompează; camera zboară spre traseu; traseul se desenează progresiv în sensul de mers, iar stațiile apar pe măsură ce linia ajunge la ele |
+| După desenare | un puls luminos parcurge traseul în buclă (`line-gradient` + `line-progress`, fără deck.gl) |
+| Tur / retur | indicatorul segmentat alunecă cu resort, iar stațiile intră pe rând |
+| Telefon | sheet cu fizică de resort și inerție la eliberare |
+
+`prefers-reduced-motion` dezactivează toate animațiile: camera sare direct, iar traseul apare complet.
+
+### Capturi de ecran
+
+```powershell
+npm run dev                   # într-un terminal
+npm run snapshot              # în altul: capturi desktop + telefon în snapshots/, prin Edge instalat
+```
+
+`BROWSER_CHANNEL=chrome` folosește Chrome în loc de Edge.
+
 ## Date
 
 ```powershell
