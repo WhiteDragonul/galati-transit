@@ -1,6 +1,6 @@
 # Raport calitate date — transport public Galați
 
-Generat: 2026-10-02T07:52:14.171Z  
+Generat: 2026-10-02T08:08:24.808Z  
 OSM: `data\raw\osm-2026-10-02.json` (date la 2026-10-02T07:17:35Z)  
 Program oficial Transurb: `data\raw\transurb-2026-10-02.json` (transurbgalati.ro/program_circulatie)  
 Date hartă: © OpenStreetMap contributors (ODbL)
@@ -13,9 +13,9 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 |---|---|
 | Linii | 30 (4 tramvai, 1 troleibuz, 25 autobuz) |
 | Variante (sensuri) | 59 |
-| Stații pe trasee (cu repetări) | 925, dintre care 916 cu poziție pe hartă (99%) |
+| Stații pe trasee (cu repetări) | 925, dintre care 919 cu poziție pe hartă (99%) |
 | Stații distincte pe hartă | 387 |
-| Linii fără probleme „date incomplete” | 24 / 30 |
+| Linii fără probleme „date incomplete” | 26 / 30 |
 | Variante fără desen pe hartă | 2 |
 | Variante cu desen OSM diferit de traseul oficial (< 80% stații regăsite) | 0 |
 | Variante cu traseu OSM întrerupt (gol > 5 m) | 0 |
@@ -38,13 +38,13 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 | **1** | Autobuz | tur | 24 | 22 | 0% | — | ✓ | ⚠ no_geometry, unmatched_stops |
 | **2** | Autobuz | tur | 17 | 15 | 0% | — | ✓ | ⚠ no_geometry, unmatched_stops |
 | **9** | Autobuz | tur | 12 | 12 | 100% | [relation/309379](https://www.openstreetmap.org/relation/309379) | ✓ | ✓ |
-| **9** | Autobuz | retur | 15 | 14 | 93% | [relation/10154626](https://www.openstreetmap.org/relation/10154626) | ✓ | ⚠ unmatched_stops |
+| **9** | Autobuz | retur | 15 | 15 | 100% | [relation/10154626](https://www.openstreetmap.org/relation/10154626) | ✓ | ✓ |
 | **10** | Autobuz | tur | 25 | 25 | 96% | [relation/358092](https://www.openstreetmap.org/relation/358092) | ✓ | ✓ |
 | **10** | Autobuz | retur | 23 | 23 | 100% | [relation/10176664](https://www.openstreetmap.org/relation/10176664) | ✓ | ✓ |
-| **11** | Autobuz | tur | 22 | 21 | 95% | [relation/10177466](https://www.openstreetmap.org/relation/10177466) | ✓ | ⚠ unmatched_stops |
+| **11** | Autobuz | tur | 22 | 22 | 100% | [relation/10177466](https://www.openstreetmap.org/relation/10177466) | ✓ | ✓ |
 | **11** | Autobuz | retur | 15 | 15 | 100% | [relation/10179043](https://www.openstreetmap.org/relation/10179043) | ✓ | ✓ |
 | **11** | Autobuz | tur (Sâmbătă, duminică și sărbători legale către grădina publică) | 21 | 21 | 100% | [relation/21251489](https://www.openstreetmap.org/relation/21251489) | ✓ | ✓ |
-| **11** | Autobuz | retur (Sâmbătă, duminică și sărbători legale către grădina publică) | 21 | 20 | 95% | [relation/21251488](https://www.openstreetmap.org/relation/21251488) | ✓ | ⚠ unmatched_stops |
+| **11** | Autobuz | retur (Sâmbătă, duminică și sărbători legale către grădina publică) | 21 | 21 | 100% | [relation/21251488](https://www.openstreetmap.org/relation/21251488) | ✓ | ✓ |
 | **13** | Autobuz | tur | 11 | 11 | 100% | [relation/21252930](https://www.openstreetmap.org/relation/21252930) | ✓ | ✓ |
 | **13** | Autobuz | retur | 11 | 11 | 100% | [relation/21253037](https://www.openstreetmap.org/relation/21253037) | ✓ | ✓ |
 | **15** | Autobuz | tur | 8 | 8 | 100% | [relation/10181002](https://www.openstreetmap.org/relation/10181002) | ✓ | ✓ |
@@ -108,6 +108,13 @@ Se folosește tipul de pe site-ul Transurb (grupa de culoare a liniei).
 - 39B: Transurb = Tramvai, OSM = Autobuz
 - 43: Transurb = Autobuz, OSM = Tramvai
 
+## Alias-uri de stații (confirmate manual)
+
+Din `stopAliases` în `data/overrides.json`: numele oficial e păstrat, alias-ul e folosit doar la potrivirea cu OSM.
+
+- F.S.E.A. → F.E.E.A.
+- FSEA → F.E.E.A.
+
 ## Stații legate prin poziția pe traseu
 
 Stația oficială e între aceiași vecini ca stația OSM și au un cuvânt semnificativ comun (de ex. tip de stradă diferit).
@@ -169,9 +176,6 @@ Stații oficiale pentru care nu există în OSM o stație cu nume potrivit pe tr
 
 - **1 tur**: ROMTELECOM, UNIVERSITATE
 - **2 tur**: LIDL, OLTULUI
-- **9 retur**: F.S.E.A.
-- **11 tur**: F.S.E.A.
-- **11 retur** (Sâmbătă, duminică și sărbători legale către grădina publică): FSEA
 - **55 tur**: POLICULTURA-FLORICULTURA
 - **105 retur**: F.E.A.A.
 

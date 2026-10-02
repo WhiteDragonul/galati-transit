@@ -21,10 +21,15 @@ export interface MergeNotes {
   nearbyMatches: { lineId: string; official: string; osm: string; distanceM: number }[];
   gapMatches: { lineId: string; official: string; osm: string }[];
   uniqueNameMatches: { lineId: string; official: string; osm: string }[];
+  aliasesUsed: Set<string>;
 }
 
-export function mergeTransurb(osm: SourceResult, tb: TransurbRaw): { data: SourceResult; schedules: ScheduleFile[]; notes: MergeNotes } {
-  const notes: MergeNotes = { notOnOfficialSite: [], modeMismatch: [], nearbyMatches: [], gapMatches: [], uniqueNameMatches: [] };
+/**
+ * @param aliases nume oficial → nume OSM pentru stații confirmate manual ca fiind aceeași
+ *        (data/overrides.json → stopAliases); se folosesc doar la potrivire, numele oficial rămâne neschimbat
+ */
+export function mergeTransurb(osm: SourceResult, tb: TransurbRaw, aliases: Record<string, string> = {}): { data: SourceResult; schedules: ScheduleFile[]; notes: MergeNotes } {
+  const notes: MergeNotes = { notOnOfficialSite: [], modeMismatch: [], nearbyMatches: [], gapMatches: [], uniqueNameMatches: [], aliasesUsed: new Set() };
   const byRef = new Map<string, Line[]>();
   for (const l of osm.lines) byRef.set(l.ref.toUpperCase(), [...(byRef.get(l.ref.toUpperCase()) ?? []), l]);
 
@@ -68,7 +73,9 @@ export function mergeTransurb(osm: SourceResult, tb: TransurbRaw): { data: Sourc
       for (const d of ['tur', 'retur'] as const) {
         const official = tv[d];
         if (!official.length) continue;
-        const names = official.map((s) => s.name);
+        // numele folosite la potrivire (cu alias-urile confirmate); afișarea păstrează numele oficial
+        const names = official.map((s) => aliases[s.name] ?? s.name);
+        official.forEach((s) => aliases[s.name] && notes.aliasesUsed.add(`${s.name} → ${aliases[s.name]}`));
 
         // varianta OSM care conține cele mai multe stații oficiale, în aceeași ordine
         let best: { v: Variant; map: number[]; matched: number } | null = null;
@@ -133,10 +140,10 @@ export function mergeTransurb(osm: SourceResult, tb: TransurbRaw): { data: Sourc
             notes.uniqueNameMatches.push({ lineId, official: names[i], osm: best.name! });
           }
 
-        const stops: VariantStop[] = names.map((n, i) => {
+        const stops: VariantStop[] = official.map((_, i) => {
           const id = stopIds[i];
           const osmName = id ? osm.stops.get(id)?.name : null;
-          return { name: osmName ?? titleCase(n), officialName: n, stopId: id };
+          return { name: osmName ?? titleCase(official[i].name), officialName: official[i].name, stopId: id };
         });
 
         const key = `v${vi + 1}:${d}`;

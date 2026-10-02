@@ -47,7 +47,7 @@ async function main() {
 
   const osm = fromOsm(raw, overrides.includeNetworks);
   // cu date oficiale: Transurb dă liniile, stațiile și orarele; OSM doar geometria și pozițiile
-  const merged = tb ? mergeTransurb(osm, tb) : null;
+  const merged = tb ? mergeTransurb(osm, tb, overrides.stopAliases) : null;
   const data = merged?.data ?? osm;
   const overrideLog = applyOverrides(data, overrides);
   computeIssues(data);

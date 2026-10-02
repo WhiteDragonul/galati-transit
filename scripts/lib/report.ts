@@ -76,6 +76,12 @@ export async function writeReport(
     for (const n of meta.notes.modeMismatch) md.push(`- ${esc(n.ref)}: Transurb = ${MODE[n.official]}, OSM = ${MODE[n.osm]}`);
     md.push('');
 
+    md.push('## Alias-uri de stații (confirmate manual)', '');
+    md.push('Din `stopAliases` în `data/overrides.json`: numele oficial e păstrat, alias-ul e folosit doar la potrivirea cu OSM.', '');
+    if (!meta.notes.aliasesUsed.size) md.push('Niciunul.');
+    for (const a of meta.notes.aliasesUsed) md.push(`- ${esc(a)}`);
+    md.push('');
+
     md.push('## Stații legate prin poziția pe traseu', '');
     md.push('Stația oficială e între aceiași vecini ca stația OSM și au un cuvânt semnificativ comun (de ex. tip de stradă diferit).', '');
     if (!meta.notes.gapMatches.length) md.push('Niciuna.');

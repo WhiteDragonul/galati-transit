@@ -5,6 +5,8 @@ import type { SourceResult } from './types.ts';
 export interface Overrides {
   /** rețelele/operatorii incluși (tag network= sau operator= din OSM) */
   includeNetworks: string[];
+  /** nume oficial Transurb → nume OSM, pentru stații confirmate manual ca fiind aceeași (ex. acronime diferite) */
+  stopAliases?: Record<string, string>;
   lines?: Record<string, { colour?: string; name?: string; hidden?: boolean }>;
   variants?: Record<string, { direction?: Direction; hidden?: boolean }>;
   stops?: Record<string, { name?: string }>;
