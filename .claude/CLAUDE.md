@@ -15,3 +15,4 @@ Hartă 3D a transportului public din Galați (Transurb). Prototip static: fără
 - Verificare vizuală: `npm run dev` + `npm run snapshot` (Edge headless prin playwright-core).
 - Commit-uri mici, mesaje în engleză; README în română.
 - Trailer: `trailer/` (timeline determinist `renderAt(t)`), `npm run trailer:assets` + `npm run trailer:render` → MP4 H.264 codat în browser (WebCodecs + mp4-muxer, fără ffmpeg).
+- UI bilingv RO/EN: `src/i18n.ts` (`t()`, comutator în antet, `?lang=en`, salvat în localStorage). Text nou în UI → cheie în ambele dicționare; numele stațiilor nu se traduc.

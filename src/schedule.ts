@@ -1,6 +1,7 @@
 // Orare oficiale: încărcare leneșă pe linie + calcule de „următoarea plecare”.
 import type { ScheduleFile } from '../shared/model.ts';
 import { DATA, type Line } from './data.ts';
+import { t } from './i18n.ts';
 
 const cache = new Map<string, Promise<ScheduleFile | null>>();
 
@@ -34,11 +35,11 @@ export function upcoming(times: string[], count = 3, now = nowMinutes()) {
   return times.filter((t) => toMinutes(t) >= now).slice(0, count);
 }
 
-export function inMinutes(t: string, now = nowMinutes()) {
-  const d = toMinutes(t) - now;
-  if (d <= 0) return 'acum';
-  if (d < 60) return `în ${d} min`;
-  return `în ${Math.floor(d / 60)} h ${d % 60 ? `${d % 60} min` : ''}`.trim();
+export function inMinutes(hhmm: string, now = nowMinutes()) {
+  const d = toMinutes(hhmm) - now;
+  if (d <= 0) return t('now');
+  if (d < 60) return t('inMin', { m: d });
+  return d % 60 ? t('inHours', { h: Math.floor(d / 60), m: d % 60 }) : t('inHoursExact', { h: d / 60 });
 }
 
 /** grupează orele pe oră: [["05", ["06","19"]], ...] */
@@ -48,4 +49,4 @@ export function byHour(times: string[]) {
   return [...m];
 }
 
-export const shortDayLabel = (s: string) => (isWeekendLabel(s) ? 'Weekend' : isWeekdayLabel(s) ? 'Luni–vineri' : s);
+export const shortDayLabel = (s: string) => (isWeekendLabel(s) ? t('weekend') : isWeekdayLabel(s) ? t('weekdays') : s);

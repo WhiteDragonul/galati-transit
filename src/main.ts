@@ -1,6 +1,7 @@
 import { Map as MlMap, NavigationControl, type Point, type PointLike } from 'maplibre-gl';
 import './map/worker.ts';
 import { loadData } from './data.ts';
+import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from './i18n.ts';
 import { addLayers, LAYER, setDimmed } from './map/layers.ts';
 import { type Padding, showSelection } from './map/selection.ts';
 import { loadBaseStyle } from './map/style.ts';
@@ -12,6 +13,19 @@ import { closePopup, openLinesPopup, openStopPopup } from './ui/popup.ts';
 import { initSheet } from './ui/sheet.ts';
 
 const GALATI: [number, number] = [28.025, 45.435];
+
+applyStatic();
+const langSwitch = $('#lang-switch');
+const syncLang = () => langSwitch.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.lang === getLang())));
+syncLang();
+langSwitch.addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-lang]');
+  if (b) setLang(b.dataset.lang as Lang);
+});
+onLangChange(() => {
+  syncLang();
+  closePopup();
+});
 
 async function main() {
   const loading = $('#loading');
@@ -105,6 +119,6 @@ main().catch((err) => {
   const loading = document.getElementById('loading');
   if (loading) {
     loading.classList.add('error');
-    loading.querySelector('p')!.textContent = 'Nu s-au putut încărca datele. Rulează „npm run data” și reîncarcă pagina.';
+    loading.querySelector('p')!.textContent = t('loadError');
   }
 });

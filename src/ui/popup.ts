@@ -2,6 +2,7 @@
 import { Popup, type Map as MlMap } from 'maplibre-gl';
 import type { AppData, Line, Variant } from '../data.ts';
 import { dayTypeIndexFor, inMinutes, loadSchedule, nowMinutes, upcoming } from '../schedule.ts';
+import { t } from '../i18n.ts';
 import { setState } from '../state.ts';
 import { badge, esc } from './dom.ts';
 
@@ -29,10 +30,10 @@ export function openStopPopup(map: MlMap, data: AppData, stopId: string) {
   const my = ++token;
 
   showPopup(map, s.coord, `
-    <h3>${s.name ? esc(s.name) : 'Stație fără nume'}</h3>
-    <p>${s.name ? `${lines.length} ${lines.length === 1 ? 'linie oprește' : 'linii opresc'} aici` : 'Numele lipsește din OpenStreetMap'}</p>
-    <div class="badges">${lines.map((l) => `<button data-line="${l.id}" aria-label="${esc(`Linia ${l.ref}`)}">${badge(data, l, 'sm')}</button>`).join('')}</div>
-    ${stops.length ? '<div class="deps"><p class="tt-msg">Se încarcă plecările…</p></div>' : ''}`);
+    <h3>${s.name ? esc(s.name) : t('unnamedStop')}</h3>
+    <p>${s.name ? (lines.length === 1 ? t('lineStopsHere') : t('linesStopHere', { n: lines.length })) : t('nameMissing')}</p>
+    <div class="badges">${lines.map((l) => `<button data-line="${l.id}" aria-label="${esc(t('lineN', { ref: l.ref }))}">${badge(data, l, 'sm')}</button>`).join('')}</div>
+    ${stops.length ? `<div class="deps"><p class="tt-msg">${t('loadingDepartures')}</p></div>` : ''}`);
 
   if (!stops.length) return;
   Promise.all(stops.map(async (x) => ({ ...x, sch: await loadSchedule(x.line) }))).then((rows) => {
@@ -49,9 +50,9 @@ export function openStopPopup(map: MlMap, data: AppData, stopId: string) {
     const el = popup.getElement().querySelector('.deps');
     if (!el) return;
     el.innerHTML = items.length
-      ? `<p class="deps-h">Următoarele plecări</p><ul>${items
-          .map(({ line, v, next }) => `<li><button data-line="${line.id}" data-variant="${v.id}">${badge(data, line, 'sm')}<span class="to">spre ${esc(v.to ?? '—')}</span>
-            <span class="when">${next.length ? `<b>${next[0]}</b> <small>${inMinutes(next[0], now)}</small>${next[1] ? ` <small>· ${next[1]}</small>` : ''}` : '<small>nu mai azi</small>'}</span></button></li>`)
+      ? `<p class="deps-h">${t('nextDepartures')}</p><ul>${items
+          .map(({ line, v, next }) => `<li><button data-line="${line.id}" data-variant="${v.id}">${badge(data, line, 'sm')}<span class="to">${v.to ? esc(t('towards', { to: v.to })) : '—'}</span>
+            <span class="when">${next.length ? `<b>${next[0]}</b> <small>${inMinutes(next[0], now)}</small>${next[1] ? ` <small>· ${next[1]}</small>` : ''}` : `<small>${t('notToday')}</small>`}</span></button></li>`)
           .join('')}</ul>`
       : '';
     wire();
@@ -63,9 +64,9 @@ export function openLinesPopup(map: MlMap, data: AppData, at: [number, number], 
   const lines = lineIds.map((id) => data.lineById.get(id)!).filter(Boolean);
   token++;
   showPopup(map, at, `
-    <h3>${lines.length} linii aici</h3>
-    <p>Alege o linie</p>
-    <div class="badges">${lines.map((l) => `<button data-line="${l.id}" aria-label="${esc(`Linia ${l.ref}`)}">${badge(data, l, 'sm')}</button>`).join('')}</div>`);
+    <h3>${t('linesHere', { n: lines.length })}</h3>
+    <p>${t('pickLine')}</p>
+    <div class="badges">${lines.map((l) => `<button data-line="${l.id}" aria-label="${esc(t('lineN', { ref: l.ref }))}">${badge(data, l, 'sm')}</button>`).join('')}</div>`);
 }
 
 function showPopup(map: MlMap, at: [number, number], html: string) {

@@ -1,4 +1,5 @@
 import type { FeatureCollection, LineString, MultiLineString, Point } from 'geojson';
+import { t } from './i18n.ts';
 import type { Line, LinesFile, Mode, RouteProps, StopProps, Variant } from '../shared/model.ts';
 
 export type { Line, Mode, Variant, StopProps };
@@ -31,7 +32,6 @@ const FALLBACK: Record<Mode, string[]> = {
 /** baza datelor statice; pe GitHub Pages aplicația nu stă la rădăcina domeniului */
 export const DATA = `${import.meta.env.BASE_URL}data/`;
 
-export const MODE_LABEL: Record<Mode, string> = { tram: 'Tramvai', trolleybus: 'Troleibuz', bus: 'Autobuz' };
 
 export async function loadData(): Promise<AppData> {
   const [linesFile, routes, stops] = await Promise.all([
@@ -87,6 +87,6 @@ export function hasWarnings(line: Line) {
 export function terminalsLabel(line: Line): string | null {
   const v = line.variants.find((x) => x.direction === 'tur') ?? line.variants[0];
   if (!v) return null;
-  if (v.from && v.to) return v.from === v.to ? `Circular · ${v.from}` : `${v.from} ↔ ${v.to}`;
+  if (v.from && v.to) return v.from === v.to ? `${t('circular')} · ${v.from}` : `${v.from} ↔ ${v.to}`;
   return null;
 }
