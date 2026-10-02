@@ -1,8 +1,11 @@
 {
-  "includeNetworks": ["Transurb"],
+  "includeNetworks": [
+    "Transurb"
+  ],
   "stopAliases": {
     "F.S.E.A.": "F.E.E.A.",
-    "FSEA": "F.E.E.A."
+    "FSEA": "F.E.E.A.",
+    "F.E.A.A.": "F.E.E.A."
   },
   "lines": {},
   "variants": {},

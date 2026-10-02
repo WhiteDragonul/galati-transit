@@ -1,6 +1,6 @@
 # Raport calitate date — transport public Galați
 
-Generat: 2026-10-02T08:08:24.808Z  
+Generat: 2026-10-02T08:11:48.055Z  
 OSM: `data\raw\osm-2026-10-02.json` (date la 2026-10-02T07:17:35Z)  
 Program oficial Transurb: `data\raw\transurb-2026-10-02.json` (transurbgalati.ro/program_circulatie)  
 Date hartă: © OpenStreetMap contributors (ODbL)
@@ -13,9 +13,9 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 |---|---|
 | Linii | 30 (4 tramvai, 1 troleibuz, 25 autobuz) |
 | Variante (sensuri) | 59 |
-| Stații pe trasee (cu repetări) | 925, dintre care 919 cu poziție pe hartă (99%) |
+| Stații pe trasee (cu repetări) | 925, dintre care 920 cu poziție pe hartă (99%) |
 | Stații distincte pe hartă | 387 |
-| Linii fără probleme „date incomplete” | 26 / 30 |
+| Linii fără probleme „date incomplete” | 27 / 30 |
 | Variante fără desen pe hartă | 2 |
 | Variante cu desen OSM diferit de traseul oficial (< 80% stații regăsite) | 0 |
 | Variante cu traseu OSM întrerupt (gol > 5 m) | 0 |
@@ -81,7 +81,7 @@ Date hartă: © OpenStreetMap contributors (ODbL)
 | **55** | Autobuz | tur | 26 | 25 | 92% | [relation/21243592](https://www.openstreetmap.org/relation/21243592) | ✓ | ⚠ unmatched_stops |
 | **55** | Autobuz | retur | 18 | 18 | 100% | [relation/21243593](https://www.openstreetmap.org/relation/21243593) | ✓ | ✓ |
 | **105** | Autobuz | tur | 19 | 19 | 100% | [relation/10177285](https://www.openstreetmap.org/relation/10177285) | ✓ | ✓ |
-| **105** | Autobuz | retur | 22 | 21 | 95% | [relation/10177284](https://www.openstreetmap.org/relation/10177284) | ✓ | ⚠ unmatched_stops |
+| **105** | Autobuz | retur | 22 | 22 | 100% | [relation/10177284](https://www.openstreetmap.org/relation/10177284) | ✓ | ✓ |
 | **106** | Autobuz | tur | 17 | 17 | 100% | [relation/21211344](https://www.openstreetmap.org/relation/21211344) | ✓ | ✓ |
 | **106** | Autobuz | retur | 20 | 20 | 100% | [relation/21211343](https://www.openstreetmap.org/relation/21211343) | ✓ | ✓ |
 
@@ -114,6 +114,7 @@ Din `stopAliases` în `data/overrides.json`: numele oficial e păstrat, alias-ul
 
 - F.S.E.A. → F.E.E.A.
 - FSEA → F.E.E.A.
+- F.E.A.A. → F.E.E.A.
 
 ## Stații legate prin poziția pe traseu
 
@@ -177,7 +178,6 @@ Stații oficiale pentru care nu există în OSM o stație cu nume potrivit pe tr
 - **1 tur**: ROMTELECOM, UNIVERSITATE
 - **2 tur**: LIDL, OLTULUI
 - **55 tur**: POLICULTURA-FLORICULTURA
-- **105 retur**: F.E.A.A.
 
 ## Trasee OSM întrerupte (gol > 5 m)
 
