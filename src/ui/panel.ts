@@ -123,7 +123,6 @@ export function initPanel(data: AppData, hooks: PanelHooks) {
         <ul>${warnings.map((m) => `<li>${esc(issueText(m))}</li>`).join('')}</ul>
         ${geoLink ? `<a href="https://www.openstreetmap.org/${geoLink}" target="_blank" rel="noopener">${t('routeInOsm')}</a>` : ''}</div>` : ''}
       ${variant?.geometrySource === 'routed' ? `<p class="info-note" role="note">${t('routedNote')}</p>` : ''}
-      ${data.colourIsFallback(line.id) ? `<p class="note" style="--c:${colour}"><i></i>${t('fallbackColour')}</p>` : ''}
       ${dirGroups.length > 1 ? `<div class="seg" role="tablist" aria-label="${t('direction')}">
         <span class="seg-thumb"></span>
         ${dirGroups.map((g) => `<button role="tab" data-variant="${g.vs[0].id}" aria-selected="${g === activeGroup}"><b>${g.label}</b><span>${g.vs[0].to ? esc(t('towards', { to: g.vs[0].to })) : '—'}</span></button>`).join('')}

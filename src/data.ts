@@ -15,7 +15,6 @@ export interface AppData {
   groupLines: Map<string, string[]>;
   /** culoarea afișată: din date sau din paleta de rezervă */
   colourOf: (lineId: string) => string;
-  colourIsFallback: (lineId: string) => boolean;
 }
 
 // Paletă de rezervă (folosită doar când sursa nu are culoare). Ordinea alternează nuanțele
@@ -75,7 +74,6 @@ export async function loadData(): Promise<AppData> {
     stopById,
     groupLines: new Map([...groupLines].map(([g, s]) => [g, [...s].sort((a, b) => order.get(a)! - order.get(b)!)])),
     colourOf: (id) => colours.get(id) ?? '#888',
-    colourIsFallback: (id) => !lineById.get(id)?.colour,
   };
 }
 
